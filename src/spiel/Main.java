@@ -15,12 +15,12 @@ public class Main {
 		m.init();
 		/*
 		 * An Stein:
-		 * Einfach nur ein bisschen zum Testen. Ich erzeuge ein Spielfeld und lasse mir alle möglichen Züge
+		 * Einfach nur ein bisschen zum Testen. Ich erzeuge ein Spielfeld und lasse mir alle mÃ¶glichen ZÃ¼ge
 		 * anzeigen.
 		 * Das funktioniert.
-		 * Es wäre cool wenn du mir irgenein GUI-Objekt hochlädst, dann kann ich machen was passiert wenn 
+		 * Es wÃ¤re cool wenn du mir irgenein GUI-Objekt hochlÃ¤dst, dann kann ich machen was passiert wenn 
 		 * geklickt wird und so. 
-		 * Ich habe das Projekt im Eclipse erzeugt und für meinen Kram die Packages figuren und spiel gemacht.
+		 * Ich habe das Projekt im Eclipse erzeugt und fÃ¼r meinen Kram die Packages figuren und spiel gemacht.
 		 * In spiel sind bisher Main.java, Spielfeld.java und Zug.java und in figuren der ganze andere Kram.
 		 * Vielleicht machst du deins dann alles in eine Package gui rein?
 		 * Achso und du bekommst dann einen Array, den ich bekomme, wenn ich m.feld.getFeld() mache. Also der,
