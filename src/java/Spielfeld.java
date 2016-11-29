@@ -62,7 +62,7 @@ public class Spielfeld {
 				continue;
 			}
 			// Wenn die Figur kein Bauer ist, darf Sie alles schlagen, bis auf eigene Figuren,
-			// aber nicht über Figuren hinwegziehen.
+			// aber nicht Ã¼ber Figuren hinwegziehen.
 			if (feld[z.getNeuX()][z.getNeuY()] == null ||
 					feld[z.getAltX()][z.getAltY()].isWeiss() != feld[z.getNeuX()][z.getNeuY()].isWeiss()) {
 				if (isWegFrei(z)) {
