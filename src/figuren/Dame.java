@@ -32,4 +32,9 @@ public class Dame extends Figur {
 		return moegl;
 	}
 
+	@Override
+	public Figur copy() {
+		return new Dame(this.isWeiss());
+	}
+
 }

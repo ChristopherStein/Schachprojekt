@@ -14,4 +14,9 @@ public class MoeglZug extends Figur {
 		return null;
 	}
 
+	@Override
+	public Figur copy() {
+		return new MoeglZug(this.isWeiss());
+	}
+
 }

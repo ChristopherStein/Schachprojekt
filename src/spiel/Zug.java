@@ -30,4 +30,16 @@ public class Zug {
 	public String toString() {
 		return this.altx + "/" + this.alty + " nach " + this.neux + "/" + this.neuy;
 	}
+	
+	public boolean equals(Object o) {
+		Zug other = (Zug) o;
+		if ((this.altx == other.altx) &&
+				(this.alty == other.alty) &&
+				(this.neux == other.neux) &&
+				(this.neuy == other.neuy)) {
+			return true;
+		}
+		return false;
+		
+	}
 }

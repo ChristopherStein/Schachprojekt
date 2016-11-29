@@ -25,4 +25,9 @@ public class Springer extends Figur {
 		return moegl;
 	}
 
+	@Override
+	public Figur copy() {
+		return new Springer(this.isWeiss());
+	}
+
 }

@@ -26,4 +26,9 @@ public class Turm extends Figur {
 		return moegl;
 	}
 
+	@Override
+	public Figur copy() {
+		return new Turm(this.isWeiss());
+	}
+
 }

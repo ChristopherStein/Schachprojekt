@@ -26,4 +26,9 @@ public class Laeufer extends Figur {
 		return moegl;
 	}
 
+	@Override
+	public Figur copy() {
+		return new Laeufer(this.isWeiss());
+	}
+
 }

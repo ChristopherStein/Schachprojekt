@@ -1,8 +1,10 @@
 package spiel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import figuren.Figur;
+import figuren.MoeglZug;
 import gui.*;
 public class Main {
 
@@ -16,38 +18,77 @@ public class Main {
 		Main m = new Main();
 		m.init();
 		Schachbrett sb=new Schachbrett();
-		int a[]=sb.setFiguren(m.feld.getFeld());
-		System.out.println(a[0]+" "+a[1]);
+		boolean wAmZug = true;
+		Figur[][] copy = m.feld.getFeld();
+		int[] zuletzt = new int[2];
+		while (m.feld.istZuende(wAmZug) == 0) {
+			
+			int a[]=sb.setFiguren(copy);
+			copy = m.feld.getFeld();
+			
+			// Es wurde eine eigene Figur angeklickt
+			if (copy[a[0]][a[1]] != null && copy[a[0]][a[1]].isWeiss() != wAmZug) {
+				zuletzt[0] = a[0];
+				zuletzt[1] = a[1];
+				copy = copy2D(copy);
+				for (Zug z : m.feld.moeglZuege(a[0], a[1])) {
+					if (copy[z.getNeuX()][z.getNeuY()] == null) {
+						copy[z.getNeuX()][z.getNeuY()] = new MoeglZug(wAmZug);
+					} else {
+						copy[z.getNeuX()][z.getNeuY()].setMoegl(true);
+					}
+				}
+			} 
+			
+			// Es wurde keine eigene Figur angeklickt
+			Zug z = new Zug(zuletzt[0], zuletzt[1], a[0], a[1]);
+			if (m.feld.moeglZuege(zuletzt[0], zuletzt[1]).contains(z)) {
+				m.feld.macheZug(z);
+				copy = copy2D(m.feld.getFeld());
+				wAmZug = !wAmZug;
+			}
+			
+		}
+		
 		/*
-		 * An Stein:
-		 * HDF
-		 * Einfach nur ein bisschen zum Testen. Ich erzeuge ein Spielfeld und lasse mir alle mï¿½glichen Zï¿½ge
-		 * anzeigen.
-		 * Das funktioniert.
-		 * Es wï¿½re cool wenn du mir irgenein GUI-Objekt hochlï¿½dst, dann kann ich machen was passiert wenn 
-		 * geklickt wird und so. 
-		 * Ich habe das Projekt im Eclipse erzeugt und fï¿½r meinen Kram die Packages figuren und spiel gemacht.
-		 * In spiel sind bisher Main.java, Spielfeld.java und Zug.java und in figuren der ganze andere Kram.
-		 * Vielleicht machst du deins dann alles in eine Package gui rein?
-		 * Achso und du bekommst dann einen Array, den ich bekomme, wenn ich m.feld.getFeld() mache. Also der,
-		 * den ich auch ausgebe.
-		 
 		 *Lieber Tobias,
 		 *
-		 *dein Programm hat mir sehr gut gefallen. Trotz der schwierigkeiten, die wir zusammen beim integrieren in
+		 *dein Programm hat mir sehr gut gefallen. Trotz der <großes S>schwierigkeiten, die wir zusammen beim <großes I>integrieren in
 		 *Eclipse hatten, funktioniert jetzt schon relativ viel.
 		 *Ich habe die Klasse Schachbrett hochgeladen und eine Instanz davon in deiner Main erstellt.
-		 *Mit der Methode "int[] setFiguren(Figur[][])" uebergibst du das aktuelle array und bekommst, falls
-		 *der user das irgendwann macht, ein array mit i,j, also der geklickten stelle wieder.
-		 *Wundere dich nicht, noch gibt es keine Schwarzen Figuren, ich ueberlege noch das man damit Schach evtl einem
-		 *neuen Klientel zugaenglich machen kann, da es fuer manche schwierig ist, sich mit schwarzen zu identifizieren oder
+		 *Mit der Methode "int[] setFiguren(Figur[][])" uebergibst du das aktuelle <großes A>array und bekommst, falls
+		 *der <großes U>user das irgendwann macht, ein <großes A>array mit i,j, also der geklickten <großes S>stelle wieder.
+		 *Wundere dich nicht, noch gibt es keine <kleines s>Schwarzen Figuren, ich ueberlege noch <dass mit 2 s>das man damit Schach evtl einem
+		 *neuen Klientel zugaenglich machen kann, da es fuer manche schwierig ist, sich mit <großes S>schwarzen zu identifizieren oder
 		 *einfach nur Schach zu spielen und dabei womoeglich zu verlieren, aber wem sag ich das.
-		 *Ich hoffe du ergoetzt dich am sprudelnden erguss der Zeit,die wir beide zu ehren des Prof. Dr.rer. 
-		 *nat. Jobst Hoffmann auf uns nahmen, und den ersten ergebnisse seiner allumfassenden weisheit, die in uns lebt und waechst.
+		 *Ich hoffe du ergoetzt dich am sprudelnden <großes E>erguss der Zeit,die wir beide zu ehren des Prof. Dr.rer. 
+		 *nat. Jobst Hoffmann auf uns nahmen, und den ersten <großes E>ergebnisse seiner allumfassenden <großes W>weisheit, die in uns lebt und waechst.
 		 *
-		 *Grues deine Frau und meine Kinder
+		 *Grue<zwei s>s deine Frau und meine Kinder
 		 *Der Tod
 		 * *ungewoehnlich seit 1995*
+		 * 
+		 * 
+		 * Lieber Christopher,
+		 * 
+		 * ich habe mich über deine Nachricht sehr gefreut. Deinen Kindern geht es gut, dein Ältester schlägt allerdings in letzter
+		 * Zeit ständig seinen Kopf gegen die Käfigwände, der wirkt irgendwie behindert.
+		 * Naja.
+		 * War ja nicht anders zu erwarten, wenn du mit einer Ziege Kinder zeugst.
+		 * 
+		 * Ich habe mir dein Schachbrett angeguckt.
+		 * Das Design müssen wir am nächsten Montag in deinem Institut bei Kaffee und Kuchen nochmal besprechen.
+		 * Du wirst neben den Figuren auch noch einen möglichen Zug bekommen, in diesem Array, dies sei dir gesagt. Ich fügte
+		 * in deine Klasse Schachbrett ein paar Kommentare und Änderungen ein, wegen Gründen.
+		 * 
+		 * Der Spielablauf ist da oben in der while-Schleife ein bisschen simuliert, ist natürlich noch nicht komplett fertig das Programm
+		 * aber läuft schon relativ süß vor sich her.
+		 * Zum Beispiel müssen wir uns noch was für die Historie und so überlegen.
+		 * 
+		 * Außerdem hat bei mir der weiße linke Turm die Koordinaten 0/0 und der schwarze linke Turm 7/7. Vielleicht kannst du das noch anpassen? :)
+		 * 
+		 * Mit freundlichen Grüßen
+		 * Xx_ThaChessKillah_xX@twitch
 		 */
 		//testAusgabe2(m);
 		/*for (int i = 0; i < 8; ++i) {
@@ -63,6 +104,20 @@ public class Main {
 		*/
 		
 		
+	}
+	
+	private static Figur[][] copy2D(Figur[][] alt) {
+		Figur[][] neu = new Figur[alt.length][alt[0].length];
+		for (int i = 0; i < alt.length; ++i) {
+			for (int j = 0; j < alt[0].length; ++j) {
+				if (alt[i][j] == null) {
+					neu[i][j] = null;
+				} else {
+					neu[i][j] = alt[i][j].copy();
+				}
+			}
+		}
+		return neu;
 	}
 	
 	public static void testAusgabe2(Main m) {

@@ -43,13 +43,25 @@ public class Spielfeld {
 		this.zuegeBisher = new ArrayList<Zug>();
 	}
 	
+	public void macheZug(Zug z) {
+		if (this.moeglZuege(z.getAltX(), z.getAltY()).contains(z)) {
+			// Ich frage das zwar mehrfach ab, aber wegen konsistenter Programmierung und so ist das richtig
+			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
+			feld[z.getAltX()][z.getAltY()] = null;
+		}
+	}
+	
 	public ArrayList<Zug> moeglZuege(int x, int y) {
 		ArrayList<Zug> moegl = new ArrayList<Zug>();
 		//System.out.println(feld[x][y].getMoeglZuege(x, y));
+		if (feld[x][y] == null) {
+			return moegl;
+		}
 		for (Zug z : feld[x][y].getMoeglZuege(x, y)) {
 			// Wenn die Figur ein Bauer ist, darf ich nur diagonal ziehen, wenn ich schlage, 
 			// und nur geradeaus ziehen, wenn ich nicht schlage.
-			if (feld[z.getAltX()][z.getNeuX()] instanceof Bauer) {
+			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
+				System.out.println(z);
 				if (z.getAltY() != z.getNeuY() && 
 						feld[z.getNeuX()][z.getNeuY()] != null &&
 						feld[z.getNeuX()][z.getNeuY()].isWeiss() != feld[z.getAltX()][z.getAltY()].isWeiss()) {
@@ -104,6 +116,58 @@ public class Spielfeld {
 			}
 		}
 		return true;
+	}
+	
+	/**
+	 * Ist das Spiel zu Ende?
+	 * @param weissAmZug Ist Weiﬂ am Zug?
+	 * @return 0 = Nicht zu Ende
+	 * 1 = Weiss gewinnt
+	 * 2 = Schwarz gewinnt
+	 */
+	public int istZuende(boolean weissAmZug) {
+		for (int i = 0; i < 8; ++i) {
+			for (int j = 0; j < 8; ++j) {
+				if (feld[i][j] != null) {
+					if (feld[i][j] instanceof Koenig) {
+						if (this.moeglZuege(i, j).size() == 0 && this.imSchach(i, j)) {
+							if (feld[i][j].isWeiss()) {
+								return 2;
+							} else {
+								return 1;
+							}
+						}
+					}
+					if (feld[i][j].isWeiss() == weissAmZug) {
+						if (this.moeglZuege(i, j).size() > 0) {
+							return 0;
+						}
+					}
+				}
+			}
+		}
+		if (weissAmZug) {
+			return 2;
+		} else {
+			return 1;
+		}
+	}
+	
+	public boolean imSchach(int x, int y) {
+		for (int i = 0; i < 8; ++i) {
+			for (int j = 0; j < 8; ++j) {
+				if (feld[i][j] == null) {
+					continue;
+				}
+				if (feld[i][j].isWeiss() == feld[x][y].isWeiss()) {
+					continue;
+				}
+				if (this.moeglZuege(i, j).contains(new Zug(i, j, x, y))) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public Figur[][] getFeld() {
