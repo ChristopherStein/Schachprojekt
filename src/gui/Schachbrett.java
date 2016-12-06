@@ -9,7 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class Schachbrett extends JFrame {
-	int[] click={-1,-1};
+	int[] click = { -1, -1 };
 	JButton feld[][] = new JButton[8][8];
 
 	public Schachbrett() {
@@ -45,13 +45,15 @@ public class Schachbrett extends JFrame {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				ImageIcon icon = null;
+				
 				feld[i][j] = new JButton("", icon);
 				menu1.add(laden);
-				feld[i][j].addActionListener(new FeldListener(i,j));
+				
+				feld[i][j].addActionListener(new FeldListener(i, j));
 				feld[i][j].setBounds(screenSize.width / 9 * j, screenSize.height / 9 * i, screenSize.width / 10,
 						screenSize.height / 10);
 				if ((i + j) % 2 == 1) {
-					feld[i][j].setBackground(Color.BLACK);
+					feld[i][j].setBackground(Color.DARK_GRAY);
 				}
 
 				this.add(feld[i][j]);
@@ -64,42 +66,54 @@ public class Schachbrett extends JFrame {
 	}
 
 	public ImageIcon getIconFromMain(Figur f) {
-		String iconpath = "";
+		String iconpath = null;
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		if(f==null){
+		if (f == null) {
 			return null;
 		}
 		switch (f.getClass().getSimpleName()) {
 		case "Bauer":
 			iconpath = "SchachBauerWeiss.img";
+			if(!f.isWeiss()){
+				iconpath="SchachBauerSchwarz.img";
+			}
 			// Mit f.isWeiss() kannst du zwischen Weiss und Schwarz untescheiden
 			break;
 		case "Dame":
 			iconpath = "SchachDameWeiss.img";
+			if(!f.isWeiss()){
+				iconpath = "SchachDameSchwarz.img";
+			}
 			break;
 		case "Koenig":
 			iconpath = "SchachKoenigWeiss.img";
+			if(!f.isWeiss()){
+				iconpath = "SchachKoenigSchwarz.img";
+			}
 			break;
 		case "Laeufer":
 			iconpath = "SchachLaeuferWeiss.img";
+			if(!f.isWeiss()){
+				iconpath = "SchachLaeuferSchwarz.img";
+			}
 			break;
 		case "Turm":
 			iconpath = "SchachTurmWeiss.img";
+			if(!f.isWeiss()){
+				iconpath = "SchachTurmSchwarz.img";
+			}
 			break;
 		case "Springer":
 			iconpath = "SchachSpringerWeiss.img";
+			if(!f.isWeiss()){
+				iconpath = "SchachSpringerSchwarz.img";
+			}
 			break;
-		case "MoeglZug":
-			// Irgendwie kennzeichnen als möglichen Zug, hellblau oder so?
-			break;
-		case"null":
+		case "null":
 			return null;
-			
 		}
-		if (f.isMoegl()) {
-			// Und hier dann gegnerische Figuren als mögliche Züge kennzeichnen (weil man sie schlagen kann)
-		}
-		ImageIcon icon = new ImageIcon("./Bilder/" + iconpath);
+
+		ImageIcon icon = new ImageIcon("./img/" + iconpath);
 		icon.setImage(
 				icon.getImage().getScaledInstance(screenSize.width / 11, screenSize.height / 11, Image.SCALE_DEFAULT));
 
@@ -110,20 +124,42 @@ public class Schachbrett extends JFrame {
 	public int[] setFiguren(Figur[][] fig) {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
+				if ((i + j) % 2 == 1) {
+					feld[i][j].setBackground(Color.DARK_GRAY);
+				}
+				else{
+					
+						feld[i][j].setBackground(null);
+					
+				}
 				feld[i][j].setIcon(getIconFromMain(fig[i][j]));
+				if (fig[i][j] instanceof MoeglZug) {
+					feld[i][j].setBackground(Color.BLUE);
+				}
+				if (fig[i][j] != null) {
+					if (fig[i][j].isMoegl()) {
+						feld[i][j].setBackground(Color.BLUE);
+					}
+				}
 			}
 		}
+		/*
+		 * if(fig[i][j].isMoegl()==true){ feld[i][j].setBackground(Color.BLUE);
+		 * }
+		 */
+
 		click[0] = -1;
-		while(click[0]==-1){
-			try{
+		while (click[0] == -1)
+
+		{
+			try {
 				Thread.sleep(100);
-			}
-			catch(InterruptedException e){
-				
+			} catch (InterruptedException e) {
+
 			}
 		}
 		return click;
-		
+
 	}
 
 	private class Speichern implements ActionListener {
@@ -136,7 +172,7 @@ public class Schachbrett extends JFrame {
 	}
 
 	private class Laden implements ActionListener {
-		
+
 		public void actionPerformed(ActionEvent a) {
 			JFileChooser loader = new JFileChooser("/home/christopher/HA/Schach/data");
 			loader.showOpenDialog(null);
@@ -153,14 +189,16 @@ public class Schachbrett extends JFrame {
 	private class FeldListener implements ActionListener {
 		int i;
 		int j;
-		public FeldListener(int i, int j){
+
+		public FeldListener(int i, int j) {
 			super();
-			this.i=i;
-			this.j=j;
+			this.i = i;
+			this.j = j;
 		}
+
 		public void actionPerformed(ActionEvent a) {
-			click[0]=i;
-			click[1]=j;
+			click[0] = i;
+			click[1] = j;
 		}
 	}
 
