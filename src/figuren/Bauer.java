@@ -22,9 +22,6 @@ public class Bauer extends Figur {
 		if (imBrett(x + r, y + 1)) {
 			moegl.add(new Zug(x, y, x + r, y + 1));
 		}
-		if (x == 1 && this.isWeiss()) {
-			moegl.add(new Zug(x, y, x, y + 2));
-		}
 		if (x == 6 && (! this.isWeiss())) {
 			moegl.add(new Zug(x, y, x - 2, y));
 		}

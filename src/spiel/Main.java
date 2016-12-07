@@ -23,10 +23,11 @@ public class Main {
 		int[] zuletzt = new int[2];
 		while (m.feld.istZuende(wAmZug) == 0) {
 			
-			int a[]=sb.setFiguren(copy);
+			int a[]=sb.setFiguren(m.feld);
 			copy = m.feld.getFeld();
 			
 			// Es wurde eine eigene Figur angeklickt
+			// Kommt ja nicht mehr vor wenn du das selber machst mit den möglichen Zügen
 			if (copy[a[0]][a[1]] != null && copy[a[0]][a[1]].isWeiss() != wAmZug) {
 				zuletzt[0] = a[0];
 				zuletzt[1] = a[1];

@@ -27,11 +27,6 @@ public class Spielfeld {
 			feld[1][i] = new Bauer(true);
 			feld[6][i] = new Bauer(false);
 		}
-		for (int i = 2; i < 6; ++i) {
-			for (int j = 0; j < 8; ++j) {
-				feld[i][j] = null;
-			}
-		}
 		feld[7][0] = new Turm(false);
 		feld[7][1] = new Springer(false);
 		feld[7][2] = new Laeufer(false);
@@ -61,7 +56,6 @@ public class Spielfeld {
 			// Wenn die Figur ein Bauer ist, darf ich nur diagonal ziehen, wenn ich schlage, 
 			// und nur geradeaus ziehen, wenn ich nicht schlage.
 			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
-				System.out.println(z);
 				if (z.getAltY() != z.getNeuY() && 
 						feld[z.getNeuX()][z.getNeuY()] != null &&
 						feld[z.getNeuX()][z.getNeuY()].isWeiss() != feld[z.getAltX()][z.getAltY()].isWeiss()) {
@@ -73,6 +67,7 @@ public class Spielfeld {
 				}
 				continue;
 			}
+			//System.out.println(z);
 			// Wenn die Figur kein Bauer ist, darf Sie alles schlagen, bis auf eigene Figuren,
 			// aber nicht über Figuren hinwegziehen.
 			if (feld[z.getNeuX()][z.getNeuY()] == null ||
@@ -87,8 +82,10 @@ public class Spielfeld {
 	}
 	
 	private boolean isWegFrei(Zug z) {
+		System.out.println("Aufrug mit: " + z);
 		int dx = z.getNeuX() - z.getAltX();
 		int dy = z.getNeuY() - z.getAltY();
+		// Figur bewegt sich auf der Y-Achse
 		if (dx == 0) {
 			for (int i = 1; i < Math.abs(dy); ++i) {
 				if (feld[z.getAltX()]
@@ -98,6 +95,7 @@ public class Spielfeld {
 			}
 			return true;
 		}
+		// Figur bewegt sich auf der X-Achse
 		if (dy == 0) {
 			for (int i = 1; i < Math.abs(dx); ++i) {
 				if (feld[z.getAltX() + i * (int) (dx / Math.abs(dx))]
@@ -107,14 +105,15 @@ public class Spielfeld {
 			}
 			return true;
 		}
-		for (int i = 1; i < Math.abs(dx); ++i) {
+		// Figur bewegt sich diagonal
+		//for (int i = 1; i < Math.abs(dx); ++i) {
 			for (int j = 1; j < Math.abs(dy); ++j) {
-				if (feld[z.getAltX() + i * (int) (dx / Math.abs(dx))]
+				if (feld[z.getAltX() + j * (int) (dx / Math.abs(dx))]
 						[z.getAltY() + j * (int) (dy / Math.abs(dy))] != null) {
 					return false;
 				}
 			}
-		}
+		//}
 		return true;
 	}
 	
@@ -126,7 +125,8 @@ public class Spielfeld {
 	 * 2 = Schwarz gewinnt
 	 */
 	public int istZuende(boolean weissAmZug) {
-		for (int i = 0; i < 8; ++i) {
+		return 0;
+		/*for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
 				if (feld[i][j] != null) {
 					if (feld[i][j] instanceof Koenig) {
@@ -150,7 +150,7 @@ public class Spielfeld {
 			return 2;
 		} else {
 			return 1;
-		}
+		}*/
 	}
 	
 	public boolean imSchach(int x, int y) {

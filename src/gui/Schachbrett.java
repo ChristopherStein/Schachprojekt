@@ -7,6 +7,7 @@ import figuren.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 public class Schachbrett extends JFrame {
 	int[] click = { -1, -1 };
@@ -113,7 +114,7 @@ public class Schachbrett extends JFrame {
 			return null;
 		}
 
-		ImageIcon icon = new ImageIcon("./img/" + iconpath);
+		ImageIcon icon = new ImageIcon("./Bilder/" + iconpath);
 		icon.setImage(
 				icon.getImage().getScaledInstance(screenSize.width / 11, screenSize.height / 11, Image.SCALE_DEFAULT));
 
@@ -121,7 +122,18 @@ public class Schachbrett extends JFrame {
 
 	}
 
-	public int[] setFiguren(Figur[][] fig) {
+	public int[] setFiguren(spiel.Spielfeld f) {
+		// Diese beiden Methoden bringen dir was, später kannst du dann noch die bisher gespielten Züge abrufen
+		//****************************************************//
+		Figur[][] fig = f.getFeld();
+		ArrayList<spiel.Zug> moegl = f.moeglZuege(0, 0);
+		//****************************************************//
+		/*
+		 * Also du machst die möglichen Züge dann selber?
+		 * Wäre cool wenn du dass dann mal machen könntest, dann änder ich die Main um, dass das vernünftig läuft 
+		 * (sollte es jetzt schon, aber ich habe da jetzt unnötigen Code). Schach und so implementiere ich danach.
+		 * Also nächster Schritt mögliche Züge machen und mir dann Bescheid sagen!  <3
+		 */
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if ((i + j) % 2 == 1) {
