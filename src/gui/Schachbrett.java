@@ -3,6 +3,7 @@ package gui;
 import javax.swing.*;
 
 import figuren.*;
+import spiel.Zug;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -10,48 +11,70 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 public class Schachbrett extends JFrame {
+	ArrayList<spiel.Zug> moegl = new ArrayList<>();
 	int[] click = { -1, -1 };
 	JButton feld[][] = new JButton[8][8];
-
-	public Schachbrett() {
+	CountDownClock c1;
+	CountDownClock c2;
+	JLabel clock1;
+	JLabel clock2;
+	JMenu menu1;
+	Dimension screenSize;
+	
+	public void initialize(){
 		this.setTitle("Schach");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
 		this.setBackground(Color.BLACK);
 		this.setExtendedState(MAXIMIZED_BOTH);
-		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		System.out.println(screenSize);
-		this.setBounds(0, 0, screenSize.width, screenSize.height);
-
-		JMenu menu1 = new JMenu("File");
-		JMenuItem save = new JMenuItem("speichern");
+		this.setBounds(0, 0, screenSize.height * 2 / 3, screenSize.height * 2 / 3);
+		menu1 = new JMenu("File");
 		JMenuItem laden = new JMenuItem("laden");
-		save.addActionListener(new Speichern());
 		laden.addActionListener(new Laden());
-		menu1.add(save);
-		menu1.addSeparator();
 		menu1.add(laden);
+	}
+	
+	public Schachbrett() {
+		initialize();
+		JMenuItem save = new JMenuItem("speichern");		
+		save.addActionListener(new Speichern());	
+		
+		menu1.addSeparator();
+		menu1.add(save);
+		
 
-		JMenu menu2 = new JMenu("Menu2");
-
-		JMenu menu3 = new JMenu("Menu3");
-
+		
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu1);
-		menubar.add(menu2);
-		menubar.add(menu3);
+		
 
 		this.setJMenuBar(menubar);
+
+		c1 = new CountDownClock(this);
+		c2 = new CountDownClock(this);
+
+		clock1 = new JLabel(c1 + "");
+		clock2 = new JLabel(c2 + "");
+		clock1.setFont(new Font("bl", Font.PLAIN, 50));
+		clock2.setFont(new Font("bl", Font.PLAIN, 50));
+		clock1.setBounds(screenSize.height * 8 / 9, screenSize.height / 9, screenSize.height / 8,
+				screenSize.height / 8);
+		clock2.setBounds(screenSize.height * 8 / 9, screenSize.height * 6 / 9, screenSize.height / 8,
+				screenSize.height / 8);
+		this.add(clock1);
+		this.add(clock2);
 
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				ImageIcon icon = null;
-				
+
 				feld[i][j] = new JButton("", icon);
-				menu1.add(laden);
 				
+
 				feld[i][j].addActionListener(new FeldListener(i, j));
-				feld[i][j].setBounds(screenSize.width / 9 * j, screenSize.height / 9 * i, screenSize.width / 10,
+				feld[i][j].setBounds(screenSize.height / 9 * j, screenSize.height / 9 * i, screenSize.height / 10,
 						screenSize.height / 10);
 				if ((i + j) % 2 == 1) {
 					feld[i][j].setBackground(Color.DARK_GRAY);
@@ -75,38 +98,38 @@ public class Schachbrett extends JFrame {
 		switch (f.getClass().getSimpleName()) {
 		case "Bauer":
 			iconpath = "SchachBauerWeiss.img";
-			if(!f.isWeiss()){
-				iconpath="SchachBauerSchwarz.img";
+			if (!f.isWeiss()) {
+				iconpath = "SchachBauerSchwarz.img";
 			}
 			// Mit f.isWeiss() kannst du zwischen Weiss und Schwarz untescheiden
 			break;
 		case "Dame":
 			iconpath = "SchachDameWeiss.img";
-			if(!f.isWeiss()){
+			if (!f.isWeiss()) {
 				iconpath = "SchachDameSchwarz.img";
 			}
 			break;
 		case "Koenig":
 			iconpath = "SchachKoenigWeiss.img";
-			if(!f.isWeiss()){
+			if (!f.isWeiss()) {
 				iconpath = "SchachKoenigSchwarz.img";
 			}
 			break;
 		case "Laeufer":
 			iconpath = "SchachLaeuferWeiss.img";
-			if(!f.isWeiss()){
+			if (!f.isWeiss()) {
 				iconpath = "SchachLaeuferSchwarz.img";
 			}
 			break;
 		case "Turm":
 			iconpath = "SchachTurmWeiss.img";
-			if(!f.isWeiss()){
+			if (!f.isWeiss()) {
 				iconpath = "SchachTurmSchwarz.img";
 			}
 			break;
 		case "Springer":
 			iconpath = "SchachSpringerWeiss.img";
-			if(!f.isWeiss()){
+			if (!f.isWeiss()) {
 				iconpath = "SchachSpringerSchwarz.img";
 			}
 			break;
@@ -116,49 +139,51 @@ public class Schachbrett extends JFrame {
 
 		ImageIcon icon = new ImageIcon("./Bilder/" + iconpath);
 		icon.setImage(
-				icon.getImage().getScaledInstance(screenSize.width / 11, screenSize.height / 11, Image.SCALE_DEFAULT));
+				icon.getImage().getScaledInstance(screenSize.height / 11, screenSize.height / 11, Image.SCALE_DEFAULT));
 
 		return icon;
 
 	}
 
+	public int[] setMoeglZuege(ArrayList<spiel.Zug> moegl) {
+		for (Zug zug : moegl) {
+			feld[zug.getNeuX()][zug.getNeuY()].setBackground(Color.BLUE);
+		}
+		return click;
+	}
+
 	public int[] setFiguren(spiel.Spielfeld f) {
-		// Diese beiden Methoden bringen dir was, später kannst du dann noch die bisher gespielten Züge abrufen
-		//****************************************************//
+		// Diese beiden Methoden bringen dir was, spÃ¤ter kannst du dann noch die
+		// bisher gespielten ZÃ¼ge abrufen
+		// ****************************************************//
 		Figur[][] fig = f.getFeld();
-		ArrayList<spiel.Zug> moegl = f.moeglZuege(0, 0);
-		//****************************************************//
+
+		// ****************************************************//
 		/*
-		 * Also du machst die möglichen Züge dann selber?
-		 * Wäre cool wenn du dass dann mal machen könntest, dann änder ich die Main um, dass das vernünftig läuft 
-		 * (sollte es jetzt schon, aber ich habe da jetzt unnötigen Code). Schach und so implementiere ich danach.
-		 * Also nächster Schritt mögliche Züge machen und mir dann Bescheid sagen!  <3
+		 * Also du machst die mÃ¶glichen ZÃ¼ge dann selber? WÃ¤re cool wenn du dass
+		 * dann mal machen kÃ¶nntest, dann Ã¤nder ich die Main um, dass das
+		 * vernÃ¼nftig lÃ¤uft (sollte es jetzt schon, aber ich habe da jetzt
+		 * unnÃ¶tigen Code). Schach und so implementiere ich danach. Also
+		 * nÃ¤chster Schritt mÃ¶gliche ZÃ¼ge machen und mir dann Bescheid sagen! <3
 		 */
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
+
 				if ((i + j) % 2 == 1) {
 					feld[i][j].setBackground(Color.DARK_GRAY);
-				}
-				else{
-					
-						feld[i][j].setBackground(null);
-					
+				} else {
+					feld[i][j].setBackground(null);
 				}
 				feld[i][j].setIcon(getIconFromMain(fig[i][j]));
-				if (fig[i][j] instanceof MoeglZug) {
-					feld[i][j].setBackground(Color.BLUE);
-				}
-				if (fig[i][j] != null) {
-					if (fig[i][j].isMoegl()) {
-						feld[i][j].setBackground(Color.BLUE);
-					}
-				}
+
 			}
 		}
-		/*
-		 * if(fig[i][j].isMoegl()==true){ feld[i][j].setBackground(Color.BLUE);
-		 * }
-		 */
+
+		// loeschen bei COMMITSEN
+		for (Zug zug : moegl) {
+			feld[zug.getNeuX()][zug.getNeuY()].setBackground(Color.BLUE);
+		}
+		// AB HIER LOESCHEN VERBOTEN
 
 		click[0] = -1;
 		while (click[0] == -1)
@@ -170,8 +195,26 @@ public class Schachbrett extends JFrame {
 
 			}
 		}
+		// HIER ABER NOCH EINS ZEILE LOESCHEN
+		moegl = f.moeglZuege(click[0], click[1]);
+
 		return click;
 
+	}
+
+	public void setTime(int minuten, int sekunden) {
+
+		if (sekunden > 9) {
+			clock1.setText(minuten + ":" + sekunden);
+		} else {
+			clock1.setText(minuten + ":0" + sekunden);
+		}
+
+		if (sekunden > 9) {
+			clock2.setText(minuten + ":" + sekunden);
+		} else {
+			clock2.setText(minuten + ":0" + sekunden);
+		}
 	}
 
 	private class Speichern implements ActionListener {
@@ -211,6 +254,7 @@ public class Schachbrett extends JFrame {
 		public void actionPerformed(ActionEvent a) {
 			click[0] = i;
 			click[1] = j;
+
 		}
 	}
 
