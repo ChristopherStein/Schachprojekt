@@ -1,6 +1,7 @@
 package spiel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import figuren.*;
 
@@ -41,6 +42,7 @@ public class Spielfeld {
 	public void macheZug(Zug z) {
 		if (this.moeglZuege(z.getAltX(), z.getAltY()).contains(z)) {
 			// Ich frage das zwar mehrfach ab, aber wegen konsistenter Programmierung und so ist das richtig
+			this.zuegeBisher.add(z);
 			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
 			feld[z.getAltX()][z.getAltY()] = null;
 		}
@@ -48,7 +50,6 @@ public class Spielfeld {
 	
 	public ArrayList<Zug> moeglZuege(int x, int y) {
 		ArrayList<Zug> moegl = new ArrayList<Zug>();
-		//System.out.println(feld[x][y].getMoeglZuege(x, y));
 		if (feld[x][y] == null) {
 			return moegl;
 		}
@@ -72,7 +73,7 @@ public class Spielfeld {
 			// aber nicht Ã¼ber Figuren hinwegziehen.
 			if (feld[z.getNeuX()][z.getNeuY()] == null ||
 					feld[z.getAltX()][z.getAltY()].isWeiss() != feld[z.getNeuX()][z.getNeuY()].isWeiss()) {
-				if (isWegFrei(z)) {
+				if (isWegFrei(z) || feld[x][y] instanceof Springer) {
 					moegl.add(z);
 				}
 				
@@ -82,7 +83,6 @@ public class Spielfeld {
 	}
 	
 	private boolean isWegFrei(Zug z) {
-		System.out.println("Aufrug mit: " + z);
 		int dx = z.getNeuX() - z.getAltX();
 		int dy = z.getNeuY() - z.getAltY();
 		// Figur bewegt sich auf der Y-Achse
@@ -125,45 +125,39 @@ public class Spielfeld {
 	 * 2 = Schwarz gewinnt
 	 */
 	public int istZuende(boolean weissAmZug) {
+		/* Das Spiel ist zu Ende, wenn der Spieler, der am Zug ist, entweder keinen Zug mehr hat
+		 * (Patt) oder er im Schach steht und keinen Zug hat, nach dem er nicht im Schach steht.
+		*/
+		
 		return 0;
-		/*for (int i = 0; i < 8; ++i) {
+	}
+	
+	public boolean imSchach(boolean weiss) {
+		// Finde raus wo der Koenig ist
+		int kX = -1, kY = -1;
+		outter:
+		for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
-				if (feld[i][j] != null) {
-					if (feld[i][j] instanceof Koenig) {
-						if (this.moeglZuege(i, j).size() == 0 && this.imSchach(i, j)) {
-							if (feld[i][j].isWeiss()) {
-								return 2;
-							} else {
-								return 1;
-							}
-						}
-					}
-					if (feld[i][j].isWeiss() == weissAmZug) {
-						if (this.moeglZuege(i, j).size() > 0) {
-							return 0;
-						}
+				if (feld[i][j] instanceof Koenig) {
+					if (feld[i][j].isWeiss() == weiss) {
+						kX = i;
+						kY = j;
+						break outter;
 					}
 				}
 			}
 		}
-		if (weissAmZug) {
-			return 2;
-		} else {
-			return 1;
-		}*/
-	}
-	
-	public boolean imSchach(int x, int y) {
+		
+		// greift eine gegnerische Figur den König an? 
+		// Also, hat eine gegnerische Figur als möglichen Zug das Feld vom König?
 		for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
-				if (feld[i][j] == null) {
-					continue;
-				}
-				if (feld[i][j].isWeiss() == feld[x][y].isWeiss()) {
-					continue;
-				}
-				if (this.moeglZuege(i, j).contains(new Zug(i, j, x, y))) {
-					return true;
+				if (feld[i][j] != null && feld[i][j].isWeiss() != weiss) {
+					for (Zug z : moeglZuege(i, j)) {
+						if (z.getNeuX() == kX && z.getNeuY() == kY) {
+							return true;
+						}
+					}
 				}
 			}
 		}
@@ -172,5 +166,32 @@ public class Spielfeld {
 	
 	public Figur[][] getFeld() {
 		return this.feld;
+	}
+
+	public String getZuegeBisher() {
+		StringBuilder sb = new StringBuilder();
+		for (Zug z : this.zuegeBisher) {
+			sb.append(z.getAltX() + "/" + z.getAltY() + " -> " + z.getNeuX() + "/" + z.getNeuY() + "\n");
+		}
+		return sb.toString();
+	}
+	
+	public static Spielfeld buildSpielfeldFromString(String history) throws NumberFormatException {
+		Spielfeld neu = new Spielfeld();
+		if (history.equals("")) {
+			return neu;
+		}
+		String[] zuege = history.split("\n");
+		try {
+			for (String s : zuege) {
+				String[] temp = s.split(" -> ");
+				String[] a = temp[0].split("/");
+				String[] n = temp[1].split("/");
+				neu.macheZug(new Zug(Integer.parseInt(a[0]), Integer.parseInt(a[1]), Integer.parseInt(n[0]), Integer.parseInt(n[1])));
+			}
+		} catch (Exception e) {
+			throw new NumberFormatException("Ungueltiges Format!");
+		}
+		return neu;
 	}
 }

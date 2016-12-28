@@ -36,10 +36,10 @@ public class CountDownClock implements Runnable {
 				sekunden = 59;
 			}
 			if (minuten == 0 && sekunden == 0) {
-				System.out.println("vorerst");
+				//System.out.println("vorerst");
 			}
 			sb.setTime(minuten, sekunden);
-			System.out.println(minuten + ":" + sekunden);
+			//System.out.println(minuten + ":" + sekunden);
 		}
 	}
 

@@ -201,6 +201,10 @@ public class Schachbrett extends JFrame {
 		return click;
 
 	}
+	
+	public void setSpielZuEnde(int wasistpassiert) {
+		// So das Spiel beenden? TODO @Stein
+	}
 
 	public void setTime(int minuten, int sekunden) {
 
