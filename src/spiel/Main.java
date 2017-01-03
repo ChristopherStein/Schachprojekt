@@ -25,6 +25,7 @@ public class Main {
 		int[] davor = new int[2];
 		
 		while (m.feld.istZuende(wAmZug) == 0) {
+			System.out.println(m.feld.getNotationFuerMenschen() + "\n\n\n");
 			davor = Arrays.copyOf(geklickt, geklickt.length);
 			geklickt = m.brett.setFiguren(m.feld);
 			if (m.feld.getFeld()[geklickt[0]][geklickt[1]] == null) {

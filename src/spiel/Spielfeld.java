@@ -164,10 +164,73 @@ public class Spielfeld {
 		return false;
 	}
 	
+	/**
+	 * Gibt das Spielfeld zurueck. An den Stellen [0][0] und  [0][7] stehen zu 
+	 * Spielbeginn die weißen Türme (die Schwarzen stehen gegenüber).
+	 * @return ein 2d-Array von der Klasse Figur. 
+	 */
 	public Figur[][] getFeld() {
 		return this.feld;
 	}
-
+	
+	/**
+	 * Gibt einen String in der für Menschen lesbaren Schachnotation zurueck.
+	 * Ich kann aus dieser Notation schwerer ein Spiel bauen, deshalb habe ich
+	 * noch die Andere drinnen. Diese hier ist nur zum Anzeigen da.
+	 * @return
+	 */
+	public String getNotationFuerMenschen() {
+		StringBuilder sb = new StringBuilder();
+		Spielfeld tmp = new Spielfeld();
+		boolean wamzug = true;
+		int i = 1;
+		for (Zug z : this.zuegeBisher) {
+			if (wamzug) { 
+				sb.append("\n" + i + ": ");
+				++i;
+			} else {
+				sb.append("  ");
+			}
+			wamzug = ! wamzug;
+			String zug = "-";
+			if (tmp.feld[z.getNeuX()][z.getNeuY()] != null) {
+				zug = "x";
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
+				sb.append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Turm) {
+				sb.append("T").append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Springer) {
+				sb.append("S").append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Laeufer) {
+				sb.append("L").append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Dame) {
+				sb.append("D").append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			if (tmp.feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
+				sb.append("K").append((char)((int)'a' + z.getAltY())).append(z.getAltX() + 1);
+				sb.append(zug).append((char)((int)'a' + z.getNeuY())).append(z.getNeuX() + 1);
+			}
+			tmp.macheZug(z);
+			if (tmp.imSchach(wamzug)) 
+				sb.append("+");
+		}
+		return sb.toString();
+	}
+	
+	/**
+	 * Gibt den Spielstand zurueck, wie die Spiele gespeichert werden.
+	 * @return ein String.
+	 */
 	public String getZuegeBisher() {
 		StringBuilder sb = new StringBuilder();
 		for (Zug z : this.zuegeBisher) {
@@ -176,6 +239,15 @@ public class Spielfeld {
 		return sb.toString();
 	}
 	
+	/** 
+	 * Baut ein Spielfeld aus einem String, wie er von getZuegeBisher() 
+	 * zurückgegeben wird. Also diese Funktion benutzt man zum Laden.
+	 * Die Methode ist statisch. Sie gibt ein Spielfeld zurück, und man
+	 * kann sie nicht auf ein Objekt aufrufen.
+	 * @param history String, wo das bisherige Spiel kodiert ist
+	 * @return Gibt ein fertiges Spielfeld zurück.
+	 * @throws NumberFormatException Wird geworfen, wenn der String fehlerhaft ist.
+	 */
 	public static Spielfeld buildSpielfeldFromString(String history) throws NumberFormatException {
 		Spielfeld neu = new Spielfeld();
 		if (history.equals("")) {
