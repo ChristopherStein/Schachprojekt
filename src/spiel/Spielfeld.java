@@ -2,6 +2,7 @@ package spiel;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 
 import figuren.*;
 
@@ -40,7 +41,7 @@ public class Spielfeld {
 	}
 	
 	public void macheZug(Zug z) {
-		if (this.moeglZuege(z.getAltX(), z.getAltY()).contains(z)) {
+		if (this.moeglZuege(z.getAltX(), z.getAltY(), false).contains(z)) {
 			// Ich frage das zwar mehrfach ab, aber wegen konsistenter Programmierung und so ist das richtig
 			this.zuegeBisher.add(z);
 			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
@@ -49,6 +50,10 @@ public class Spielfeld {
 	}
 	
 	public ArrayList<Zug> moeglZuege(int x, int y) {
+		return moeglZuege(x, y, true);
+	}
+	
+	public ArrayList<Zug> moeglZuege(int x, int y, boolean pruefeSchach) {
 		ArrayList<Zug> moegl = new ArrayList<Zug>();
 		if (feld[x][y] == null) {
 			return moegl;
@@ -77,6 +82,16 @@ public class Spielfeld {
 					moegl.add(z);
 				}
 				
+			}
+		}
+		if (pruefeSchach) {
+			Iterator<Zug> i = moegl.iterator();
+			while (i.hasNext()) {
+				Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
+				temp.macheZug(i.next());
+				if (temp.imSchach(feld[x][y].isWeiss())) {
+					i.remove();
+				}
 			}
 		}
 		return moegl;
@@ -153,7 +168,7 @@ public class Spielfeld {
 		for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
 				if (feld[i][j] != null && feld[i][j].isWeiss() != weiss) {
-					for (Zug z : moeglZuege(i, j)) {
+					for (Zug z : moeglZuege(i, j, false)) {
 						if (z.getNeuX() == kX && z.getNeuY() == kY) {
 							return true;
 						}

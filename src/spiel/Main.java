@@ -60,7 +60,8 @@ public class Main {
 			} else {
 				// Gegnerische Figur wurde angeklickt.
 				
-				if (m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug) {					
+				if ((m.feld.getFeld()[davor[0]][davor[1]] != null) && 
+						(m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug)) {					
 					// Davor wurde eine eigene Figur angeklickt: Zug möglich?
 					
 					Zug z = new Zug(davor[0], davor[1], geklickt[0], geklickt[1]);
