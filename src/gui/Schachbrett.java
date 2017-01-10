@@ -20,38 +20,40 @@ public class Schachbrett extends JFrame {
 	JLabel clock2;
 	JMenu menu1;
 	Dimension screenSize;
-	
-	public void initialize(){
+	JLabel spielLabel;
+
+	public void initialize() {
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
 		this.setTitle("Schach");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
 		this.setBackground(Color.BLACK);
 		this.setExtendedState(MAXIMIZED_BOTH);
-		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		System.out.println(screenSize);
 		this.setBounds(0, 0, screenSize.height * 2 / 3, screenSize.height * 2 / 3);
 		menu1 = new JMenu("File");
 		JMenuItem laden = new JMenuItem("laden");
 		laden.addActionListener(new Laden());
 		menu1.add(laden);
+
 	}
-	
+
 	public Schachbrett() {
 		initialize();
-		JMenuItem save = new JMenuItem("speichern");		
-		save.addActionListener(new Speichern());	
-		
+		JMenuItem save = new JMenuItem("speichern");
+		save.addActionListener(new Speichern());
+
 		menu1.addSeparator();
 		menu1.add(save);
-		
 
-		
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu1);
-		
 
 		this.setJMenuBar(menubar);
-
+		spielLabel = new JLabel("");
+		spielLabel.setBounds(screenSize.height * 1 / 9, screenSize.height * 7 / 9, screenSize.height,
+				screenSize.height * 2 / 10);
+		this.add(spielLabel);
 		c1 = new CountDownClock(this);
 		c2 = new CountDownClock(this);
 
@@ -59,9 +61,9 @@ public class Schachbrett extends JFrame {
 		clock2 = new JLabel(c2 + "");
 		clock1.setFont(new Font("bl", Font.PLAIN, 50));
 		clock2.setFont(new Font("bl", Font.PLAIN, 50));
-		clock1.setBounds(screenSize.height * 8 / 9, screenSize.height / 9, screenSize.height / 8,
+		clock1.setBounds(screenSize.height * 8 / 10, screenSize.height / 10, screenSize.height / 8,
 				screenSize.height / 8);
-		clock2.setBounds(screenSize.height * 8 / 9, screenSize.height * 6 / 9, screenSize.height / 8,
+		clock2.setBounds(screenSize.height * 8 / 10, screenSize.height * 6 / 10, screenSize.height / 8,
 				screenSize.height / 8);
 		this.add(clock1);
 		this.add(clock2);
@@ -71,11 +73,10 @@ public class Schachbrett extends JFrame {
 				ImageIcon icon = null;
 
 				feld[i][j] = new JButton("", icon);
-				
 
 				feld[i][j].addActionListener(new FeldListener(i, j));
-				feld[i][j].setBounds(screenSize.height / 9 * j, screenSize.height / 9 * i, screenSize.height / 10,
-						screenSize.height / 10);
+				feld[i][j].setBounds(screenSize.height / 10 * j, screenSize.height / 10 * i, screenSize.height / 11,
+						screenSize.height / 11);
 				if ((i + j) % 2 == 1) {
 					feld[i][j].setBackground(Color.DARK_GRAY);
 				}
@@ -178,12 +179,9 @@ public class Schachbrett extends JFrame {
 
 			}
 		}
-
-		// loeschen bei COMMITSEN
-		for (Zug zug : moegl) {
-			feld[zug.getNeuX()][zug.getNeuY()].setBackground(Color.BLUE);
-		}
-		// AB HIER LOESCHEN VERBOTEN
+		this.setMoeglZuege(moegl);
+		this.spielLabel.setText(f.getZuegeBisher());
+		System.out.println(f.getZuegeBisher());
 
 		click[0] = -1;
 		while (click[0] == -1)
@@ -195,19 +193,19 @@ public class Schachbrett extends JFrame {
 
 			}
 		}
-		// HIER ABER NOCH EINS ZEILE LOESCHEN
+
 		moegl = f.moeglZuege(click[0], click[1]);
 
 		return click;
 
 	}
-	
+
 	public void setSpielZuEnde(int wasistpassiert) {
 		// So das Spiel beenden? TODO @Stein
 	}
 
 	public void setTime(int minuten, int sekunden) {
-
+		this.spielLabel.setText(this.spielLabel.getText() + "35634564564564561");
 		if (sekunden > 9) {
 			clock1.setText(minuten + ":" + sekunden);
 		} else {
