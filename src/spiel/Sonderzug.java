@@ -18,8 +18,8 @@ public class Sonderzug extends Zug {
 			}
 		}
 		if (typ.equals("enPassant")) {
-			this.geschlagenx = neux;
-			geschlageny = alty;
+			this.geschlagenx = altx;
+			geschlageny = neuy;
 		}
 	}
 
