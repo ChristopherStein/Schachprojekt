@@ -270,7 +270,30 @@ public class Spielfeld {
 		/* Das Spiel ist zu Ende, wenn der Spieler, der am Zug ist, entweder keinen Zug mehr hat
 		 * nach dem er im Schach steht
 		 * (Patt) oder er im Schach steht und keinen Zug hat, nach dem er nicht im Schach steht.
+		 * Oder wenn keiner mehr matt setzten kann, dann ist auch unentschieden.
 		*/
+		int staerkeW = 0, staerkeS = 0;
+		for (int i = 0; i < 8; ++i) {
+			for (int j = 0; j < 8; ++j) {
+				if (feld[i][j] == null) continue;
+				if (feld[i][j] instanceof Springer || feld[i][j] instanceof Laeufer) {
+					if (feld[i][j].isWeiss()) {
+						staerkeW += 3;
+					} else {
+						staerkeS += 3;
+					}
+				} else if (!(feld[i][j] instanceof Koenig)) {
+					if (feld[i][j].isWeiss()) {
+						staerkeW += 6;
+					} else {
+						staerkeS += 6;
+					}
+				}
+				
+			}
+		}
+		if (staerkeW < 6 && staerkeS < 6)
+			return 3;
 		for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
 				if (feld[i][j] == null) continue;
