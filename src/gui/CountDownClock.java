@@ -6,6 +6,7 @@ public class CountDownClock implements Runnable {
 	private int sekunden;
 	private Schachbrett sb;
 	private boolean farbe;
+	private boolean running=true;
 
 	public CountDownClock(Schachbrett sb, boolean farbe) {
 		minuten = 15;
@@ -16,7 +17,9 @@ public class CountDownClock implements Runnable {
 		System.out.println(this.farbe);
 
 	}
-
+	public void stop(){
+		running=false;
+	}
 	public void start(Schachbrett sb) {
 		if (thread == null) {
 			thread = new Thread(this);
@@ -26,7 +29,7 @@ public class CountDownClock implements Runnable {
 
 	public void run() {
 
-		while (true) {
+		while (running) {
 
 			try {
 				Thread.sleep(1000);
