@@ -1,7 +1,6 @@
 package spiel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 
 import figuren.*;
@@ -233,17 +232,39 @@ public class Spielfeld {
 	
 	/**
 	 * Ist das Spiel zu Ende?
-	 * @param weissAmZug Ist Wei√ü am Zug?
+	 * @param weissAmZug Ist Weiss am Zug?
 	 * @return 0 = Nicht zu Ende
 	 * 1 = Weiss gewinnt
 	 * 2 = Schwarz gewinnt
+	 * 3 = Patt
 	 */
 	public int istZuende(boolean weissAmZug) {
 		/* Das Spiel ist zu Ende, wenn der Spieler, der am Zug ist, entweder keinen Zug mehr hat
+		 * nach dem er im Schach steht
 		 * (Patt) oder er im Schach steht und keinen Zug hat, nach dem er nicht im Schach steht.
 		*/
-		
-		return 0;
+		for (int i = 0; i < 8; ++i) {
+			for (int j = 0; j < 8; ++j) {
+				if (feld[i][j] == null) continue;
+				if (feld[i][j].isWeiss() != weissAmZug) continue;
+				// Alle mˆglichen Z¸ge von dem Spieler der grade dran ist
+				for (Zug z : moeglZuege(i, j)) {
+					Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
+					temp.macheZug(z);
+					// Wenn er einen Zug hat, nach dem er nicht im Schach steht, hat er nicht verloren
+					if (! temp.imSchach(weissAmZug)) return 0;
+				}
+			}
+		}
+		// Wenn ich hier ankomme, hat der aktuelle Spieler keinen mˆglichen Zug mehr
+		if (imSchach(weissAmZug)) {
+			if (weissAmZug) {
+				return 2;
+			}
+			return 1;
+		}
+		return 3;
+			
 	}
 	
 	public boolean imSchach(boolean weiss) {

@@ -1,11 +1,10 @@
 
 package spiel;
 
-import java.util.ArrayList;
+import gui.Schachbrett;
+
 import java.util.Arrays;
 
-import figuren.Figur;
-import gui.*;
 public class Main {
 
 	private Spielfeld feld;
@@ -19,7 +18,9 @@ public class Main {
 	public static void main(String args[]) {
 		Main m = new Main();
 		m.init();
-		spieleSpiel(m);
+		int resultat = spieleSpiel(m);
+		m.brett.setFiguren(m.feld);
+		m.brett.setSpielZuEnde(resultat);
 	}
 	
 	private static int spieleSpiel(Main m) {
@@ -98,20 +99,6 @@ public class Main {
 			}
 		}
 		return m.feld.istZuende(wAmZug);
-	}
-	
-	private static Figur[][] copy2D(Figur[][] alt) {
-		Figur[][] neu = new Figur[alt.length][alt[0].length];
-		for (int i = 0; i < alt.length; ++i) {
-			for (int j = 0; j < alt[0].length; ++j) {
-				if (alt[i][j] == null) {
-					neu[i][j] = null;
-				} else {
-					neu[i][j] = alt[i][j].copy();
-				}
-			}
-		}
-		return neu;
 	}
 	
 }

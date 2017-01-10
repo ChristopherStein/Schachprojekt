@@ -1,6 +1,5 @@
 package figuren;
 
-import java.awt.image.ImageFilter;
 import java.util.ArrayList;
 
 import spiel.Sonderzug;

@@ -242,6 +242,12 @@ public class Schachbrett extends JFrame {
 	}
 
 	public void setSpielZuEnde(int wasistpassiert) {
+		if (wasistpassiert == 1)
+			System.out.println("Weiss gewinnt");
+		if (wasistpassiert == 2)
+			System.out.println("Schwarz gewinnt");
+		if (wasistpassiert == 3)
+			System.out.println("Patt");
 		c1 = null;
 		c2 = null;
 	}
