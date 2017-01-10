@@ -5,12 +5,15 @@ public class CountDownClock implements Runnable {
 	private int minuten;
 	private int sekunden;
 	private Schachbrett sb;
+	private boolean farbe;
 
-	public CountDownClock(Schachbrett sb) {
+	public CountDownClock(Schachbrett sb, boolean farbe) {
 		minuten = 15;
 		sekunden = 0;
 		this.sb = sb;
+		this.farbe = farbe;
 		start(sb);
+		System.out.println(this.farbe);
 
 	}
 
@@ -22,24 +25,28 @@ public class CountDownClock implements Runnable {
 	}
 
 	public void run() {
-		while (true) {
 
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
+		while (true) {
+			
+			if (this.farbe == sb.getWAmZug()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+				if (sekunden != 0) {
+					sekunden--;
+				} else {
+					minuten--;
+					sekunden = 59;
+				}
+				if (minuten == 0 && sekunden == 0) {
+					sb.setTime(minuten, sekunden, farbe);
+					return;
+				}
+				
+				sb.setTime(minuten, sekunden, farbe);
 			}
-			if (sekunden != 0) {
-				sekunden--;
-			} else {		this.sb = sb;
-				minuten--;
-				sekunden = 59;
-			}
-			if (minuten == 0 && sekunden == 0) {
-				//System.out.println("vorerst");
-			}
-			sb.setTime(minuten, sekunden);
-			//System.out.println(minuten + ":" + sekunden);
 		}
 	}
 
