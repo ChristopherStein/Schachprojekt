@@ -2,18 +2,25 @@ package gui;
 
 import javax.swing.*;
 
+import com.sun.xml.internal.stream.util.BufferAllocator;
+
 import figuren.*;
 import spiel.Zug;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Schachbrett extends JFrame {
 	ArrayList<spiel.Zug> moegl = new ArrayList<>();
 	int[] click = { -1, -1 };
 	JButton feld[][] = new JButton[8][8];
+	JButton friedhof_weis[][] = new JButton[5][3];
+	JButton friedhof_schwarz[][] = new JButton[5][3];
 	CountDownClock c1;
 	CountDownClock c2;
 	JLabel clock1;
@@ -25,6 +32,7 @@ public class Schachbrett extends JFrame {
 	private JComboBox auswahlFrame;
 	protected boolean unbestaetigt;
 	private JLabel sieger;
+	private boolean mit_Uhr = true;
 
 	public void initialize() {
 		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -36,32 +44,19 @@ public class Schachbrett extends JFrame {
 		this.setExtendedState(MAXIMIZED_BOTH);
 		this.setBounds(0, 0, screenSize.height * 2 / 3, screenSize.height * 2 / 3);
 		menu1 = new JMenu("File");
-		JMenuItem laden = new JMenuItem("laden");
+
+		JMenuItem laden = new JMenuItem("Laden");
 		laden.addActionListener(new Laden());
 		menu1.add(laden);
+		JMenuItem save = new JMenuItem("Speichern");
+		save.addActionListener(new Speichern(this));
+		menu1.addSeparator();
+		menu1.add(save);
+		JMenuItem neu = new JMenuItem("Neues Spiel");
 
 	}
 
-	public Schachbrett() {
-		initialize();
-		JMenuItem save = new JMenuItem("speichern");
-		save.addActionListener(new Speichern());
-
-		menu1.addSeparator();
-		menu1.add(save);
-
-		JMenuBar menubar = new JMenuBar();
-		menubar.add(menu1);
-
-		this.setJMenuBar(menubar);
-		spielLabel = new JTextArea("");
-		spielLabel.setBounds(screenSize.height * 1 / 20, screenSize.height * 15 / 18, screenSize.height,
-				screenSize.height * 2 / 10);
-
-		this.add(spielLabel);
-		spielLabel.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 15 / 1032));
-		spielLabel.setLineWrap(true);
-		spielLabel.setWrapStyleWord(true);
+	public void init_Uhren() {
 
 		c1 = new CountDownClock(this, true);
 		c2 = new CountDownClock(this, false);
@@ -76,6 +71,25 @@ public class Schachbrett extends JFrame {
 				screenSize.height / 8);
 		this.add(clock1);
 		this.add(clock2);
+	}
+
+	public Schachbrett() {
+		initialize();
+		if (mit_Uhr) {
+			init_Uhren();
+		}
+		JMenuBar menubar = new JMenuBar();
+		menubar.add(menu1);
+
+		this.setJMenuBar(menubar);
+		spielLabel = new JTextArea("");
+		spielLabel.setBounds(screenSize.height * 1 / 20, screenSize.height * 15 / 18, screenSize.height,
+				screenSize.height * 2 / 10);
+
+		this.add(spielLabel);
+		spielLabel.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 15 / 1032));
+		spielLabel.setLineWrap(true);
+		spielLabel.setWrapStyleWord(true);
 
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
@@ -91,6 +105,28 @@ public class Schachbrett extends JFrame {
 				}
 
 				this.add(feld[i][j]);
+
+			}
+		}
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 3; j++) {
+				ImageIcon icon = null;
+
+				friedhof_weis[i][j] = new JButton("", icon);
+				friedhof_schwarz[i][j] = new JButton("", icon);
+
+				friedhof_weis[i][j].setBounds(screenSize.height * 8 / 10 + screenSize.height * i / 25,
+						screenSize.height * j / 25, screenSize.height / 25, screenSize.height / 25);
+				friedhof_schwarz[i][j].setBounds(screenSize.height * 8 / 10 + screenSize.height * i / 25,
+						screenSize.height * 7 / 10 + screenSize.height * j / 25, screenSize.height / 25,
+						screenSize.height / 25);
+
+				friedhof_weis[i][j].setFont(new Font("Serif", Font.ITALIC, 8));
+				friedhof_schwarz[i][j].setFont(new Font("Serif", Font.ITALIC, 8));
+				friedhof_schwarz[i][j].setVisible(false);
+				friedhof_weis[i][j].setVisible(false);
+				this.add(friedhof_weis[i][j]);
+				this.add(friedhof_schwarz[i][j]);
 
 			}
 		}
@@ -206,15 +242,21 @@ public class Schachbrett extends JFrame {
 				for (int j = 0; j < 8; j++) {
 					if (fig[i][j] instanceof Koenig) {
 						if (!fig[i][j].isWeiss()) {
-							feld[i][j].setBackground(Color.RED);
+							feld[i][j].setBackground(Color.MAGENTA);
 						}
 					}
 
 				}
 			}
 		}
+		for (int i = 0; i < 5; i++) {
+			for (int j = 0; j < 3; j++) {
+
+			}
+		}
 
 		this.setMoeglZuege(moegl);
+		this.setFriedhof(f.getGeschlagen());
 		this.spielLabel.setText(f.getNotationFuerMenschen().replace("\n", "  "));
 
 		click[0] = -1;
@@ -239,18 +281,109 @@ public class Schachbrett extends JFrame {
 
 	}
 
-	public void setSpielZuEnde(int wasistpassiert) {
-		sieger=new JLabel();
-		sieger.setBounds(screenSize.height * 8 / 10, screenSize.height * 4 / 10, screenSize.height / 8,
+	private void setFriedhof(ArrayList<Figur> geschlagen) {
+		int weis_anzahl = 0;
+		int schwarz_anzahl = 0;
+
+		for (int i = 0; i < geschlagen.size(); i++) {
+			if (geschlagen.get(i).isWeiss()) {
+				String ret;
+				switch (geschlagen.get(i).getClass().toString().replace("class figuren.", "")) {
+				case "Bauer":
+					ret = "B";
+					break;
+				case "Turm":
+					ret = "T";
+					break;
+				case "Laeufer":
+					ret = "L";
+					break;
+				case "Dame":
+					ret = "D";
+					break;
+				default:
+					ret = "S";
+				}
+				friedhof_weis[weis_anzahl / 3][weis_anzahl % 3].setText(ret);
+				friedhof_weis[weis_anzahl/ 3][weis_anzahl % 3].setVisible(true);
+				weis_anzahl++;
+			}
+			if (!geschlagen.get(i).isWeiss()) {
+				String ret;
+
+				switch (geschlagen.get(i).getClass().toString().replace("class figuren.", "")) {
+				case "Bauer":
+					ret = "B";
+					break;
+				case "Turm":
+					ret = "T";
+					break;
+				case "Laeufer":
+					ret = "L";
+					break;
+				case "Dame":
+					ret = "D";
+					break;
+				default:
+					ret = "S";
+				}
+				friedhof_schwarz[schwarz_anzahl / 3][schwarz_anzahl % 3].setText(ret);
+				friedhof_schwarz[schwarz_anzahl / 3][schwarz_anzahl % 3].setVisible(true);
+				schwarz_anzahl++;
+			}
+		}
+
+	}
+
+	public void setSpielZuEnde(int wasistpassiert, spiel.Spielfeld f) {
+		Figur fig[][] = f.getFeld();
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if ((i + j) % 2 == 0) {
+					feld[i][j].setBackground(Color.DARK_GRAY);
+				}
+				if (f.imSchach(false)) {
+
+					if (fig[i][j] instanceof Koenig) {
+						if (!fig[i][j].isWeiss()) {
+							feld[i][j].setBackground(Color.RED);
+
+						}
+					}
+				}
+				if (f.imSchach(true)) {
+					if (fig[i][j] instanceof Koenig) {
+						if (fig[i][j].isWeiss()) {
+							feld[i][j].setBackground(Color.RED);
+
+						}
+					}
+				} else {
+					feld[i][j].setBackground(null);
+				}
+				feld[i][j].setIcon(getIconFromMain(f.getFeld()[i][j]));
+
+			}
+		}
+		sieger = new JLabel();
+		sieger.setBounds(screenSize.height * 8 / 10, screenSize.height * 4 / 10, screenSize.height / 3,
 				screenSize.height / 16);
-		sieger.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 50 / 1032));
+		sieger.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 20 / 1032));
 		if (wasistpassiert == 2) {
 			sieger.setText("Schwarz gewinnt");
 		}
+		if (wasistpassiert == 1) {
+			sieger.setText("Weiss gewinnt");
+		}
 		this.add(sieger);
-		c1.stop();
-		c2.stop();
+		if (mit_Uhr) {
+			c1.stop();
+			c2.stop();
+		}
+		this.setVisible(true);
 		System.out.println(wasistpassiert);
+		revalidate();
+		repaint();
 		// System.out.println("jo ende");
 	}
 
@@ -271,6 +404,8 @@ public class Schachbrett extends JFrame {
 		best.addActionListener(new Bauernwahl(this));
 		this.add(auswahlFrame);
 		this.add(best);
+		revalidate();
+		repaint();
 
 		unbestaetigt = true;
 		while (unbestaetigt) {
@@ -284,6 +419,10 @@ public class Schachbrett extends JFrame {
 		}
 
 		return auswahlFrame.getSelectedItem().toString();
+	}
+
+	public String getNotation() {
+		return spielLabel.getText();
 	}
 
 	public void setTime(int minuten, int sekunden, boolean farbe) {
@@ -301,6 +440,8 @@ public class Schachbrett extends JFrame {
 				clock2.setText(minuten + ":0" + sekunden);
 			}
 		}
+		revalidate();
+		repaint();
 
 	}
 
@@ -319,11 +460,25 @@ public class Schachbrett extends JFrame {
 	}
 
 	private class Speichern implements ActionListener {
+		private Schachbrett sb;
+
+		public Speichern(Schachbrett sb) {
+			super();
+			this.sb = sb;
+		}
+
 		public void actionPerformed(ActionEvent a) {
 			JFileChooser saver = new JFileChooser("/home/christopher/HA/Schach/data");
 			saver.showSaveDialog(null);
 			String file = saver.getSelectedFile().toString();
-			System.out.println(file);
+			try {
+				FileWriter fw = new FileWriter(file);
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(sb.getNotation().replace("  ", "\n"));
+				bw.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -340,6 +495,34 @@ public class Schachbrett extends JFrame {
 			}
 
 		}
+	}
+
+	private class NeuesSpiel_ohne implements ActionListener {
+		private Schachbrett sb;
+
+		public NeuesSpiel_ohne(Schachbrett sb) {
+			super();
+			this.sb = sb;
+		}
+
+		public void actionPerformed(ActionEvent a) {
+			sb.mit_Uhr = false;
+		}
+
+	}
+
+	private class NeuesSpiel_mit implements ActionListener {
+		private Schachbrett sb;
+
+		public NeuesSpiel_mit(Schachbrett sb) {
+			super();
+			this.sb = sb;
+		}
+
+		public void actionPerformed(ActionEvent a) {
+			sb.mit_Uhr = false;
+		}
+
 	}
 
 	private class FeldListener implements ActionListener {
