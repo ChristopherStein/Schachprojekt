@@ -51,47 +51,68 @@ public class Spielfeld {
 	}
 	
 	public void macheZug(Zug z) {
-		if (this.moeglZuege(z.getAltX(), z.getAltY(), false).contains(z)) {
-			if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
-				if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
-					this.rochadeWeissKurz = false;
+		if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
+			if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
+				this.rochadeWeissKurz = false;
+				this.rochadeWeissLang = false;
+			} else {
+				this.rochadeSchwarzKurz = false;
+				this.rochadeSchwarzLang = false;
+			}
+		}
+		if (feld[z.getAltX()][z.getAltY()] instanceof Turm) {
+			if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
+				if (z.getAltY() == 0) {
 					this.rochadeWeissLang = false;
-				} else {
-					this.rochadeSchwarzKurz = false;
+				} else if (z.getAltY() == 7) {
+					this.rochadeWeissKurz = false;
+				}
+				
+			} else {
+				if (z.getAltY() == 0) {
 					this.rochadeSchwarzLang = false;
+				} else if (z.getAltY() == 7) {
+					this.rochadeSchwarzKurz = false;
 				}
 			}
-			if (feld[z.getAltX()][z.getAltY()] instanceof Turm) {
-				if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
-					if (z.getAltY() == 0) {
-						this.rochadeWeissLang = false;
-					} else if (z.getAltY() == 7) {
-						this.rochadeWeissKurz = false;
-					}
-					
+		}
+		if (z instanceof Sonderzug) {
+			System.out.println("Sonderzug");
+			if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
+				System.out.println("Rochade");
+				// Rochade
+				if (((Sonderzug) z).isRochadeKlein()) {
+					System.out.println("klein");
+					feld[z.getAltX()][5] = feld[z.getAltX()][7];
+					feld[z.getAltX()][7] = null;
+					feld[z.getAltX()][6] = feld[z.getAltX()][4];
+					feld[z.getAltX()][4] = null;
 				} else {
-					if (z.getAltY() == 0) {
-						this.rochadeSchwarzLang = false;
-					} else if (z.getAltY() == 7) {
-						this.rochadeSchwarzKurz = false;
-					}
+					System.out.println("groß");
+					feld[z.getAltX()][3] = feld[z.getAltX()][0];
+					feld[z.getAltX()][0] = null;
+					feld[z.getAltX()][2] = feld[z.getAltX()][4];
+					feld[z.getAltX()][4] = null;
 				}
 			}
-			if (z instanceof Sonderzug) {
-				if (this.feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
-					// Rochade
-					
-				}
+			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
+				// En Passant
+				feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
+				feld[z.getAltX()][z.getAltY()] = null;
+				feld[z.getNeuX()][z.getAltY()] = null;
 			}
-			this.zuegeBisher.add(z);
-			this.wAmZug=!wAmZug;
+		} else {
 			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
 			feld[z.getAltX()][z.getAltY()] = null;
 		}
+		this.zuegeBisher.add(z);
+		this.wAmZug=!wAmZug;
 	}
+	
 	public boolean getWAmZug(){
-		return wAmZug;
+		return this.wAmZug;
 	}
+	
 	public ArrayList<Zug> moeglZuege(int x, int y) {
 		return moeglZuege(x, y, true);
 	}
@@ -102,9 +123,40 @@ public class Spielfeld {
 			return moegl;
 		}
 		for (Zug z : feld[x][y].getMoeglZuege(x, y)) {
-			// Bei Koenigen muss ich auf Rochade pruefen
+			// Pruefen auf Sonderzug
 			if (z instanceof Sonderzug) {
-				
+				if (feld[x][y] instanceof Koenig) {
+					if (! pruefeSchach) continue;
+					// Rochade
+					if (((Sonderzug) z).isRochadeKlein()) {
+						if (feld[x][y].isWeiss()) {
+							if (! this.rochadeWeissKurz) continue;
+						} else {
+							if (! this.rochadeSchwarzKurz) continue;
+						}
+					} else {
+						if (feld[x][y].isWeiss()) {
+							if (! this.rochadeWeissLang) continue;
+						} else {
+							if (! this.rochadeSchwarzLang) continue;
+						}
+					}
+					// Der Koenig darf nicht rochieren wenn er im Schach steht oder über 
+					// ein Feld läuft, auf dem er im Schach steht; außerdem, wenn er oder der Turm
+					// sich schon mal bewegt haben.
+					if (this.imSchach(feld[x][y].isWeiss())) continue;
+
+					Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
+					
+					if (((Sonderzug) z).isRochadeKlein()) {
+						temp.macheZug(new Zug(x, y, x, y + 1));
+					} else {
+						temp.macheZug(new Zug(x, y, x, y - 1));
+					}
+					
+					if (temp.imSchach(feld[x][y].isWeiss())) continue;
+					//moegl.add(z);
+				}
 			}
 			// Wenn die Figur ein Bauer ist, darf ich nur diagonal ziehen, wenn ich schlage, 
 			// und nur geradeaus ziehen, wenn ich nicht schlage.
@@ -115,7 +167,7 @@ public class Spielfeld {
 					moegl.add(z);
 				}
 				if (z.getAltY() == z.getNeuY() && 
-						feld[z.getNeuX()][z.getNeuY()] == null) {
+						feld[z.getNeuX()][z.getNeuY()] == null && isWegFrei(z)) {
 					moegl.add(z);
 				}
 				continue;

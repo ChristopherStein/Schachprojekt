@@ -27,24 +27,25 @@ public class CountDownClock implements Runnable {
 	public void run() {
 
 		while (true) {
-
-			try {
-				Thread.sleep(1000);
-				if (this.farbe == sb.getWAmZug()) {
-					if (sekunden != 0) {
-						sekunden--;
-					} else {
-						minuten--;
-						sekunden = 59;
-					}
-					if (minuten == 0 && sekunden == 0) {
-						sb.setTime(minuten, sekunden, farbe);
-						return;
-					}
+			
+			if (this.farbe == sb.getWAmZug()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
 				}
+				if (sekunden != 0) {
+					sekunden--;
+				} else {
+					minuten--;
+					sekunden = 59;
+				}
+				if (minuten == 0 && sekunden == 0) {
+					sb.setTime(minuten, sekunden, farbe);
+					return;
+				}
+				
 				sb.setTime(minuten, sekunden, farbe);
-			} catch (InterruptedException e) {
-				Thread.currentThread().interrupt();
 			}
 		}
 	}

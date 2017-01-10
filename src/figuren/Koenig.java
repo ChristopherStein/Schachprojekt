@@ -1,7 +1,9 @@
 package figuren;
 
+import java.awt.image.ImageFilter;
 import java.util.ArrayList;
 
+import spiel.Sonderzug;
 import spiel.Zug;
 
 public class Koenig extends Figur {
@@ -22,6 +24,10 @@ public class Koenig extends Figur {
 				}
 			}
 		}
+		if (imBrett(x, y - 2))
+			moegl.add(new Sonderzug(x, y, x, y - 2, "Rochade"));
+		if (imBrett(x, y + 2))
+			moegl.add(new Sonderzug(x, y, x, y + 2, "Rochade"));
 		return moegl;
 	}
 

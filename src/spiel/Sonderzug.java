@@ -9,12 +9,12 @@ public class Sonderzug extends Zug {
 	public Sonderzug(int altx, int alty, int neux, int neuy, String typ) {
 		super(altx, alty, neux, neuy);
 		if (typ.equals("Rochade")) {
-			if (neux == 6) {
+			if (neuy == 6) {
 				this.rochadeKlein = true;
-			} else if (neux == 2) {
+			} else if (neuy == 2) {
 				this.rochadeKlein = false;
 			} else {
-				System.out.println("Ungueltige Rochade uebergeben!");
+				typ = "Ungueltig";
 			}
 		}
 		if (typ.equals("enPassant")) {
