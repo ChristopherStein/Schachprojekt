@@ -20,48 +20,59 @@ public class Schachbrett extends JFrame {
 	JLabel clock2;
 	JMenu menu1;
 	Dimension screenSize;
-	
-	public void initialize(){
+	JTextArea spielLabel;
+	private boolean wAmZug;
+	private JComboBox auswahlFrame;
+	protected boolean unbestaetigt;
+	private JLabel sieger;
+
+	public void initialize() {
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+
 		this.setTitle("Schach");
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setLayout(null);
-		this.setBackground(Color.BLACK);
+		this.setBackground(Color.WHITE);
 		this.setExtendedState(MAXIMIZED_BOTH);
-		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-		System.out.println(screenSize);
 		this.setBounds(0, 0, screenSize.height * 2 / 3, screenSize.height * 2 / 3);
 		menu1 = new JMenu("File");
 		JMenuItem laden = new JMenuItem("laden");
 		laden.addActionListener(new Laden());
 		menu1.add(laden);
+
 	}
-	
+
 	public Schachbrett() {
 		initialize();
-		JMenuItem save = new JMenuItem("speichern");		
-		save.addActionListener(new Speichern());	
-		
+		JMenuItem save = new JMenuItem("speichern");
+		save.addActionListener(new Speichern());
+
 		menu1.addSeparator();
 		menu1.add(save);
-		
 
-		
 		JMenuBar menubar = new JMenuBar();
 		menubar.add(menu1);
-		
 
 		this.setJMenuBar(menubar);
+		spielLabel = new JTextArea("");
+		spielLabel.setBounds(screenSize.height * 1 / 20, screenSize.height * 15 / 18, screenSize.height,
+				screenSize.height * 2 / 10);
 
-		c1 = new CountDownClock(this);
-		c2 = new CountDownClock(this);
+		this.add(spielLabel);
+		spielLabel.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 15 / 1032));
+		spielLabel.setLineWrap(true);
+		spielLabel.setWrapStyleWord(true);
+
+		c1 = new CountDownClock(this, true);
+		c2 = new CountDownClock(this, false);
 
 		clock1 = new JLabel(c1 + "");
 		clock2 = new JLabel(c2 + "");
-		clock1.setFont(new Font("bl", Font.PLAIN, 50));
-		clock2.setFont(new Font("bl", Font.PLAIN, 50));
-		clock1.setBounds(screenSize.height * 8 / 9, screenSize.height / 9, screenSize.height / 8,
+		clock1.setFont(new Font("bl", Font.PLAIN, screenSize.height * 50 / 1000));
+		clock2.setFont(new Font("bl", Font.PLAIN, screenSize.height * 50 / 1000));
+		clock1.setBounds(screenSize.height * 8 / 10, screenSize.height / 10, screenSize.height / 8,
 				screenSize.height / 8);
-		clock2.setBounds(screenSize.height * 8 / 9, screenSize.height * 6 / 9, screenSize.height / 8,
+		clock2.setBounds(screenSize.height * 8 / 10, screenSize.height * 6 / 10, screenSize.height / 8,
 				screenSize.height / 8);
 		this.add(clock1);
 		this.add(clock2);
@@ -71,12 +82,11 @@ public class Schachbrett extends JFrame {
 				ImageIcon icon = null;
 
 				feld[i][j] = new JButton("", icon);
-				
 
 				feld[i][j].addActionListener(new FeldListener(i, j));
-				feld[i][j].setBounds(screenSize.height / 9 * j, screenSize.height / 9 * i, screenSize.height / 10,
-						screenSize.height / 10);
-				if ((i + j) % 2 == 1) {
+				feld[i][j].setBounds(screenSize.height / 10 * j, screenSize.height / 10 * i, screenSize.height / 11,
+						screenSize.height / 11);
+				if ((i + j) % 2 == 0) {
 					feld[i][j].setBackground(Color.DARK_GRAY);
 				}
 
@@ -86,6 +96,7 @@ public class Schachbrett extends JFrame {
 		}
 
 		this.setVisible(true);
+		// System.out.println(bauernWahl());
 
 	}
 
@@ -101,7 +112,7 @@ public class Schachbrett extends JFrame {
 			if (!f.isWeiss()) {
 				iconpath = "SchachBauerSchwarz.img";
 			}
-			// Mit f.isWeiss() kannst du zwischen Weiss und Schwarz untescheiden
+
 			break;
 		case "Dame":
 			iconpath = "SchachDameWeiss.img";
@@ -157,7 +168,7 @@ public class Schachbrett extends JFrame {
 		// bisher gespielten Züge abrufen
 		// ****************************************************//
 		Figur[][] fig = f.getFeld();
-
+		wAmZug = f.getWAmZug();
 		// ****************************************************//
 		/*
 		 * Also du machst die möglichen Züge dann selber? Wäre cool wenn du dass
@@ -169,7 +180,7 @@ public class Schachbrett extends JFrame {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 
-				if ((i + j) % 2 == 1) {
+				if ((i + j) % 2 == 0) {
 					feld[i][j].setBackground(Color.DARK_GRAY);
 				} else {
 					feld[i][j].setBackground(null);
@@ -178,12 +189,33 @@ public class Schachbrett extends JFrame {
 
 			}
 		}
+		if (f.imSchach(true)) {
+			for (int i = 0; i < 8; i++) {
+				for (int j = 0; j < 8; j++) {
+					if (fig[i][j] instanceof Koenig) {
+						if (fig[i][j].isWeiss()) {
+							feld[i][j].setBackground(Color.MAGENTA);
+						}
+					}
 
-		// loeschen bei COMMITSEN
-		for (Zug zug : moegl) {
-			feld[zug.getNeuX()][zug.getNeuY()].setBackground(Color.BLUE);
+				}
+			}
 		}
-		// AB HIER LOESCHEN VERBOTEN
+		if (f.imSchach(false)) {
+			for (int i = 0; i < 8; i++) {
+				for (int j = 0; j < 8; j++) {
+					if (fig[i][j] instanceof Koenig) {
+						if (!fig[i][j].isWeiss()) {
+							feld[i][j].setBackground(Color.RED);
+						}
+					}
+
+				}
+			}
+		}
+
+		this.setMoeglZuege(moegl);
+		this.spielLabel.setText(f.getNotationFuerMenschen().replace("\n", "  "));
 
 		click[0] = -1;
 		while (click[0] == -1)
@@ -195,29 +227,94 @@ public class Schachbrett extends JFrame {
 
 			}
 		}
-		// HIER ABER NOCH EINS ZEILE LOESCHEN
-		moegl = f.moeglZuege(click[0], click[1]);
+
+		if (f.getFeld()[click[0]][click[1]] != null && f.getFeld()[click[0]][click[1]].isWeiss() == f.getWAmZug()) {
+
+			moegl = f.moeglZuege(click[0], click[1]);
+		} else {
+			moegl.clear();
+		}
 
 		return click;
 
 	}
-	
+
 	public void setSpielZuEnde(int wasistpassiert) {
-		// So das Spiel beenden? TODO @Stein
+		sieger=new JLabel();
+		sieger.setBounds(screenSize.height * 8 / 10, screenSize.height * 4 / 10, screenSize.height / 8,
+				screenSize.height / 16);
+		sieger.setFont(new Font("Serif", Font.ITALIC, screenSize.height * 50 / 1032));
+		if (wasistpassiert == 2) {
+			sieger.setText("Schwarz gewinnt");
+		}
+		this.add(sieger);
+		c1.stop();
+		c2.stop();
+		System.out.println(wasistpassiert);
+		// System.out.println("jo ende");
 	}
 
-	public void setTime(int minuten, int sekunden) {
+	public boolean getWAmZug() {
+		return wAmZug;
+	}
 
-		if (sekunden > 9) {
-			clock1.setText(minuten + ":" + sekunden);
-		} else {
-			clock1.setText(minuten + ":0" + sekunden);
+	public String bauernWahl() {
+		String comboBoxListe[] = { "Springer", "Laeufer", "Turm", "Dame" };
+		auswahlFrame = new JComboBox(comboBoxListe);
+		auswahlFrame.setSelectedIndex(3);
+		auswahlFrame.setBounds(screenSize.height * 8 / 10, screenSize.height * 3 / 10, screenSize.height / 8,
+				screenSize.height / 16);
+
+		JButton best = new JButton("Bestaetigen");
+		best.setBounds(screenSize.height * 8 / 10, screenSize.height * 4 / 10, screenSize.height / 8,
+				screenSize.height / 16);
+		best.addActionListener(new Bauernwahl(this));
+		this.add(auswahlFrame);
+		this.add(best);
+
+		unbestaetigt = true;
+		while (unbestaetigt) {
+			// System.out.println(unbestaetigt);
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+
+				System.out.println(e);
+			}
 		}
 
-		if (sekunden > 9) {
-			clock2.setText(minuten + ":" + sekunden);
+		return auswahlFrame.getSelectedItem().toString();
+	}
+
+	public void setTime(int minuten, int sekunden, boolean farbe) {
+
+		if (farbe == true) {
+			if (sekunden > 9) {
+				clock1.setText(minuten + ":" + sekunden);
+			} else {
+				clock1.setText(minuten + ":0" + sekunden);
+			}
 		} else {
-			clock2.setText(minuten + ":0" + sekunden);
+			if (sekunden > 9) {
+				clock2.setText(minuten + ":" + sekunden);
+			} else {
+				clock2.setText(minuten + ":0" + sekunden);
+			}
+		}
+
+	}
+
+	private class Bauernwahl implements ActionListener {
+		private Schachbrett sb;
+
+		public Bauernwahl(Schachbrett sb) {
+			super();
+			this.sb = sb;
+		}
+
+		public void actionPerformed(ActionEvent e) {
+
+			sb.unbestaetigt = false;
 		}
 	}
 
