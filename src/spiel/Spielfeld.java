@@ -1,19 +1,14 @@
 package spiel;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 
 import figuren.*;
 
 public class Spielfeld {
-	private boolean wAmZug=true;
+	
 	private Figur[][] feld;
 	private ArrayList<Zug> zuegeBisher;
-	private boolean rochadeWeissKurz;
-	private boolean rochadeSchwarzKurz;
-	private boolean rochadeWeissLang;
-	private boolean rochadeSchwarzLang;
-	private ArrayList<Zug> enPassant;
 	
 	public Spielfeld() {
 		this.init();
@@ -42,121 +37,23 @@ public class Spielfeld {
 		feld[7][6] = new Springer(false);
 		feld[7][7] = new Turm(false);
 		this.zuegeBisher = new ArrayList<Zug>();
-		this.rochadeWeissKurz = true;
-		this.rochadeSchwarzKurz = true;
-		this.rochadeSchwarzLang = true;
-		this.rochadeWeissLang = true;
-		this.enPassant = new ArrayList<Zug>();
 	}
 	
 	public void macheZug(Zug z) {
-		if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
-			if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
-				this.rochadeWeissKurz = false;
-				this.rochadeWeissLang = false;
-			} else {
-				this.rochadeSchwarzKurz = false;
-				this.rochadeSchwarzLang = false;
-			}
-		}
-		if (feld[z.getAltX()][z.getAltY()] instanceof Turm) {
-			if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
-				if (z.getAltY() == 0) {
-					this.rochadeWeissLang = false;
-				} else if (z.getAltY() == 7) {
-					this.rochadeWeissKurz = false;
-				}
-				
-			} else {
-				if (z.getAltY() == 0) {
-					this.rochadeSchwarzLang = false;
-				} else if (z.getAltY() == 7) {
-					this.rochadeSchwarzKurz = false;
-				}
-			}
-		}
-		if (z instanceof Sonderzug) {
-			System.out.println("Sonderzug");
-			if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
-				System.out.println("Rochade");
-				// Rochade
-				if (((Sonderzug) z).isRochadeKlein()) {
-					System.out.println("klein");
-					feld[z.getAltX()][5] = feld[z.getAltX()][7];
-					feld[z.getAltX()][7] = null;
-					feld[z.getAltX()][6] = feld[z.getAltX()][4];
-					feld[z.getAltX()][4] = null;
-				} else {
-					System.out.println("groß");
-					feld[z.getAltX()][3] = feld[z.getAltX()][0];
-					feld[z.getAltX()][0] = null;
-					feld[z.getAltX()][2] = feld[z.getAltX()][4];
-					feld[z.getAltX()][4] = null;
-				}
-			}
-			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
-				// En Passant
-				feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
-				feld[z.getAltX()][z.getAltY()] = null;
-				feld[z.getNeuX()][z.getAltY()] = null;
-			}
-		} else {
+		if (this.moeglZuege(z.getAltX(), z.getAltY()).contains(z)) {
+			// Ich frage das zwar mehrfach ab, aber wegen konsistenter Programmierung und so ist das richtig
+			this.zuegeBisher.add(z);
 			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
 			feld[z.getAltX()][z.getAltY()] = null;
 		}
-		this.zuegeBisher.add(z);
-		this.wAmZug=!wAmZug;
-	}
-	
-	public boolean getWAmZug(){
-		return this.wAmZug;
 	}
 	
 	public ArrayList<Zug> moeglZuege(int x, int y) {
-		return moeglZuege(x, y, true);
-	}
-	
-	public ArrayList<Zug> moeglZuege(int x, int y, boolean pruefeSchach) {
 		ArrayList<Zug> moegl = new ArrayList<Zug>();
 		if (feld[x][y] == null) {
 			return moegl;
 		}
 		for (Zug z : feld[x][y].getMoeglZuege(x, y)) {
-			// Pruefen auf Sonderzug
-			if (z instanceof Sonderzug) {
-				if (feld[x][y] instanceof Koenig) {
-					if (! pruefeSchach) continue;
-					// Rochade
-					if (((Sonderzug) z).isRochadeKlein()) {
-						if (feld[x][y].isWeiss()) {
-							if (! this.rochadeWeissKurz) continue;
-						} else {
-							if (! this.rochadeSchwarzKurz) continue;
-						}
-					} else {
-						if (feld[x][y].isWeiss()) {
-							if (! this.rochadeWeissLang) continue;
-						} else {
-							if (! this.rochadeSchwarzLang) continue;
-						}
-					}
-					// Der Koenig darf nicht rochieren wenn er im Schach steht oder über 
-					// ein Feld läuft, auf dem er im Schach steht; außerdem, wenn er oder der Turm
-					// sich schon mal bewegt haben.
-					if (this.imSchach(feld[x][y].isWeiss())) continue;
-
-					Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
-					
-					if (((Sonderzug) z).isRochadeKlein()) {
-						temp.macheZug(new Zug(x, y, x, y + 1));
-					} else {
-						temp.macheZug(new Zug(x, y, x, y - 1));
-					}
-					
-					if (temp.imSchach(feld[x][y].isWeiss())) continue;
-					//moegl.add(z);
-				}
-			}
 			// Wenn die Figur ein Bauer ist, darf ich nur diagonal ziehen, wenn ich schlage, 
 			// und nur geradeaus ziehen, wenn ich nicht schlage.
 			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
@@ -166,30 +63,20 @@ public class Spielfeld {
 					moegl.add(z);
 				}
 				if (z.getAltY() == z.getNeuY() && 
-						feld[z.getNeuX()][z.getNeuY()] == null && isWegFrei(z)) {
+						feld[z.getNeuX()][z.getNeuY()] == null) {
 					moegl.add(z);
 				}
 				continue;
 			}
 			//System.out.println(z);
 			// Wenn die Figur kein Bauer ist, darf Sie alles schlagen, bis auf eigene Figuren,
-			// aber nicht ÃƒÂ¼ber Figuren hinwegziehen.
+			// aber nicht Ã¼ber Figuren hinwegziehen.
 			if (feld[z.getNeuX()][z.getNeuY()] == null ||
 					feld[z.getAltX()][z.getAltY()].isWeiss() != feld[z.getNeuX()][z.getNeuY()].isWeiss()) {
 				if (isWegFrei(z) || feld[x][y] instanceof Springer) {
 					moegl.add(z);
 				}
 				
-			}
-		}
-		if (pruefeSchach) {
-			Iterator<Zug> i = moegl.iterator();
-			while (i.hasNext()) {
-				Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
-				temp.macheZug(i.next());
-				if (temp.imSchach(feld[x][y].isWeiss())) {
-					i.remove();
-				}
 			}
 		}
 		return moegl;
@@ -232,39 +119,17 @@ public class Spielfeld {
 	
 	/**
 	 * Ist das Spiel zu Ende?
-	 * @param weissAmZug Ist Weiss am Zug?
+	 * @param weissAmZug Ist Weiß am Zug?
 	 * @return 0 = Nicht zu Ende
 	 * 1 = Weiss gewinnt
 	 * 2 = Schwarz gewinnt
-	 * 3 = Patt
 	 */
 	public int istZuende(boolean weissAmZug) {
 		/* Das Spiel ist zu Ende, wenn der Spieler, der am Zug ist, entweder keinen Zug mehr hat
-		 * nach dem er im Schach steht
 		 * (Patt) oder er im Schach steht und keinen Zug hat, nach dem er nicht im Schach steht.
 		*/
-		for (int i = 0; i < 8; ++i) {
-			for (int j = 0; j < 8; ++j) {
-				if (feld[i][j] == null) continue;
-				if (feld[i][j].isWeiss() != weissAmZug) continue;
-				// Alle möglichen Züge von dem Spieler der grade dran ist
-				for (Zug z : moeglZuege(i, j)) {
-					Spielfeld temp = Spielfeld.buildSpielfeldFromString(this.getZuegeBisher());
-					temp.macheZug(z);
-					// Wenn er einen Zug hat, nach dem er nicht im Schach steht, hat er nicht verloren
-					if (! temp.imSchach(weissAmZug)) return 0;
-				}
-			}
-		}
-		// Wenn ich hier ankomme, hat der aktuelle Spieler keinen möglichen Zug mehr
-		if (imSchach(weissAmZug)) {
-			if (weissAmZug) {
-				return 2;
-			}
-			return 1;
-		}
-		return 3;
-			
+		
+		return 0;
 	}
 	
 	public boolean imSchach(boolean weiss) {
@@ -283,12 +148,12 @@ public class Spielfeld {
 			}
 		}
 		
-		// greift eine gegnerische Figur den KÃ¶nig an? 
-		// Also, hat eine gegnerische Figur als mÃ¶glichen Zug das Feld vom KÃ¶nig?
+		// greift eine gegnerische Figur den König an? 
+		// Also, hat eine gegnerische Figur als möglichen Zug das Feld vom König?
 		for (int i = 0; i < 8; ++i) {
 			for (int j = 0; j < 8; ++j) {
 				if (feld[i][j] != null && feld[i][j].isWeiss() != weiss) {
-					for (Zug z : moeglZuege(i, j, false)) {
+					for (Zug z : moeglZuege(i, j)) {
 						if (z.getNeuX() == kX && z.getNeuY() == kY) {
 							return true;
 						}
@@ -301,7 +166,7 @@ public class Spielfeld {
 	
 	/**
 	 * Gibt das Spielfeld zurueck. An den Stellen [0][0] und  [0][7] stehen zu 
-	 * Spielbeginn die weiÃŸen TÃ¼rme (die Schwarzen stehen gegenÃ¼ber).
+	 * Spielbeginn die weißen Türme (die Schwarzen stehen gegenüber).
 	 * @return ein 2d-Array von der Klasse Figur. 
 	 */
 	public Figur[][] getFeld() {
@@ -309,7 +174,7 @@ public class Spielfeld {
 	}
 	
 	/**
-	 * Gibt einen String in der fÃ¼r Menschen lesbaren Schachnotation zurueck.
+	 * Gibt einen String in der für Menschen lesbaren Schachnotation zurueck.
 	 * Ich kann aus dieser Notation schwerer ein Spiel bauen, deshalb habe ich
 	 * noch die Andere drinnen. Diese hier ist nur zum Anzeigen da.
 	 * @return
@@ -376,11 +241,11 @@ public class Spielfeld {
 	
 	/** 
 	 * Baut ein Spielfeld aus einem String, wie er von getZuegeBisher() 
-	 * zurÃ¼ckgegeben wird. Also diese Funktion benutzt man zum Laden.
-	 * Die Methode ist statisch. Sie gibt ein Spielfeld zurÃ¼ck, und man
+	 * zurückgegeben wird. Also diese Funktion benutzt man zum Laden.
+	 * Die Methode ist statisch. Sie gibt ein Spielfeld zurück, und man
 	 * kann sie nicht auf ein Objekt aufrufen.
 	 * @param history String, wo das bisherige Spiel kodiert ist
-	 * @return Gibt ein fertiges Spielfeld zurÃ¼ck.
+	 * @return Gibt ein fertiges Spielfeld zurück.
 	 * @throws NumberFormatException Wird geworfen, wenn der String fehlerhaft ist.
 	 */
 	public static Spielfeld buildSpielfeldFromString(String history) throws NumberFormatException {
