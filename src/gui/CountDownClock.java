@@ -31,7 +31,7 @@ public class CountDownClock implements Runnable {
 			}
 			if (sekunden != 0) {
 				sekunden--;
-			} else {
+			} else {		this.sb = sb;
 				minuten--;
 				sekunden = 59;
 			}
