@@ -10,6 +10,11 @@ public class Spielfeld {
 	
 	private Figur[][] feld;
 	private ArrayList<Zug> zuegeBisher;
+	private boolean rochadeWeissKurz;
+	private boolean rochadeSchwarzKurz;
+	private boolean rochadeWeissLang;
+	private boolean rochadeSchwarzLang;
+	private ArrayList<Zug> enPassant;
 	
 	public Spielfeld() {
 		this.init();
@@ -38,11 +43,46 @@ public class Spielfeld {
 		feld[7][6] = new Springer(false);
 		feld[7][7] = new Turm(false);
 		this.zuegeBisher = new ArrayList<Zug>();
+		this.rochadeWeissKurz = true;
+		this.rochadeSchwarzKurz = true;
+		this.rochadeSchwarzLang = true;
+		this.rochadeWeissLang = true;
+		this.enPassant = new ArrayList<Zug>();
 	}
 	
 	public void macheZug(Zug z) {
 		if (this.moeglZuege(z.getAltX(), z.getAltY(), false).contains(z)) {
-			// Ich frage das zwar mehrfach ab, aber wegen konsistenter Programmierung und so ist das richtig
+			if (feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
+				if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
+					this.rochadeWeissKurz = false;
+					this.rochadeWeissLang = false;
+				} else {
+					this.rochadeSchwarzKurz = false;
+					this.rochadeSchwarzLang = false;
+				}
+			}
+			if (feld[z.getAltX()][z.getAltY()] instanceof Turm) {
+				if (feld[z.getAltX()][z.getAltY()].isWeiss()) {
+					if (z.getAltY() == 0) {
+						this.rochadeWeissLang = false;
+					} else if (z.getAltY() == 7) {
+						this.rochadeWeissKurz = false;
+					}
+					
+				} else {
+					if (z.getAltY() == 0) {
+						this.rochadeSchwarzLang = false;
+					} else if (z.getAltY() == 7) {
+						this.rochadeSchwarzKurz = false;
+					}
+				}
+			}
+			if (z instanceof Sonderzug) {
+				if (this.feld[z.getAltX()][z.getAltY()] instanceof Koenig) {
+					// Rochade
+					
+				}
+			}
 			this.zuegeBisher.add(z);
 			feld[z.getNeuX()][z.getNeuY()] = feld[z.getAltX()][z.getAltY()];
 			feld[z.getAltX()][z.getAltY()] = null;
@@ -59,6 +99,10 @@ public class Spielfeld {
 			return moegl;
 		}
 		for (Zug z : feld[x][y].getMoeglZuege(x, y)) {
+			// Bei Koenigen muss ich auf Rochade pruefen
+			if (z instanceof Sonderzug) {
+				
+			}
 			// Wenn die Figur ein Bauer ist, darf ich nur diagonal ziehen, wenn ich schlage, 
 			// und nur geradeaus ziehen, wenn ich nicht schlage.
 			if (feld[z.getAltX()][z.getAltY()] instanceof Bauer) {
