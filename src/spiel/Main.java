@@ -25,14 +25,13 @@ public class Main {
 		int[] davor = new int[2];
 		
 		while (m.feld.istZuende(wAmZug) == 0) {
-			System.out.println(m.feld.getNotationFuerMenschen() + "\n\n\n");
 			davor = Arrays.copyOf(geklickt, geklickt.length);
 			geklickt = m.brett.setFiguren(m.feld);
 			if (m.feld.getFeld()[geklickt[0]][geklickt[1]] == null) {
 				// Leeres Feld wurde angeklickt
 				
 				if (m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug) {					
-					// Davor wurde eine eigene Figur angeklickt: Zug möglich?
+					// Davor wurde eine eigene Figur angeklickt: Zug mÃ¶glich?
 					
 					Zug z = new Zug(davor[0], davor[1], geklickt[0], geklickt[1]);
 					
@@ -44,7 +43,7 @@ public class Main {
 							continue;
 						}
 						
-						// Wenn der Zug möglich ist, wird er ausgeführt.
+						// Wenn der Zug mÃ¶glich ist, wird er ausgefÃ¼hrt.
 						m.feld.macheZug(z);
 						
 						// Der andere Spieler ist jetzt am Zug
@@ -56,13 +55,12 @@ public class Main {
 			}
 			if (m.feld.getFeld()[geklickt[0]][geklickt[1]].isWeiss() == wAmZug) {
 				// Eigene Figur wurde angeklickt
-				// Mögliche Züge werden von Stein angezeigt -> ich mache nichts.
+				// MÃ¶gliche ZÃ¼ge werden von Stein angezeigt -> ich mache nichts.
 			} else {
 				// Gegnerische Figur wurde angeklickt.
 				
-				if ((m.feld.getFeld()[davor[0]][davor[1]] != null) && 
-						(m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug)) {					
-					// Davor wurde eine eigene Figur angeklickt: Zug möglich?
+				if (m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug) {					
+					// Davor wurde eine eigene Figur angeklickt: Zug mÃ¶glich?
 					
 					Zug z = new Zug(davor[0], davor[1], geklickt[0], geklickt[1]);
 					
@@ -74,7 +72,7 @@ public class Main {
 							continue;
 						}
 						
-						// Wenn der Zug möglich ist, wird er ausgeführt.
+						// Wenn der Zug mÃ¶glich ist, wird er ausgefÃ¼hrt.
 						m.feld.macheZug(z);
 						
 						// Der andere Spieler ist jetzt am Zug
