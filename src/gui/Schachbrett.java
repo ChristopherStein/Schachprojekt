@@ -21,6 +21,7 @@ public class Schachbrett extends JFrame {
 	JMenu menu1;
 	Dimension screenSize;
 	JLabel spielLabel;
+	private boolean wAmZug;
 
 	public void initialize() {
 		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -54,8 +55,8 @@ public class Schachbrett extends JFrame {
 		spielLabel.setBounds(screenSize.height * 1 / 9, screenSize.height * 7 / 9, screenSize.height,
 				screenSize.height * 2 / 10);
 		this.add(spielLabel);
-		c1 = new CountDownClock(this);
-		c2 = new CountDownClock(this);
+		c1 = new CountDownClock(this, true);
+		c2 = new CountDownClock(this, false);
 
 		clock1 = new JLabel(c1 + "");
 		clock2 = new JLabel(c2 + "");
@@ -158,7 +159,7 @@ public class Schachbrett extends JFrame {
 		// bisher gespielten Züge abrufen
 		// ****************************************************//
 		Figur[][] fig = f.getFeld();
-
+		wAmZug = f.getWAmZug();
 		// ****************************************************//
 		/*
 		 * Also du machst die möglichen Züge dann selber? Wäre cool wenn du dass
@@ -180,8 +181,8 @@ public class Schachbrett extends JFrame {
 			}
 		}
 		this.setMoeglZuege(moegl);
-		this.spielLabel.setText(f.getZuegeBisher());
-		System.out.println(f.getZuegeBisher());
+		this.spielLabel.setText(f.getNotationFuerMenschen());
+		
 
 		click[0] = -1;
 		while (click[0] == -1)
@@ -194,7 +195,12 @@ public class Schachbrett extends JFrame {
 			}
 		}
 
-		moegl = f.moeglZuege(click[0], click[1]);
+		if (f.getFeld()[click[0]][click[1]] != null && f.getFeld()[click[0]][click[1]].isWeiss() == f.getWAmZug()) {
+
+			moegl = f.moeglZuege(click[0], click[1]);
+		} else {
+			moegl.clear();
+		}
 
 		return click;
 
@@ -204,19 +210,25 @@ public class Schachbrett extends JFrame {
 		// So das Spiel beenden? TODO @Stein
 	}
 
-	public void setTime(int minuten, int sekunden) {
-		this.spielLabel.setText(this.spielLabel.getText() + "35634564564564561");
-		if (sekunden > 9) {
-			clock1.setText(minuten + ":" + sekunden);
-		} else {
-			clock1.setText(minuten + ":0" + sekunden);
-		}
+	public boolean getWAmZug() {
+		return wAmZug;
+	}
 
-		if (sekunden > 9) {
-			clock2.setText(minuten + ":" + sekunden);
+	public void setTime(int minuten, int sekunden, boolean farbe) {
+		if (farbe == true) {
+			if (sekunden > 9) {
+				clock1.setText(minuten + ":" + sekunden);
+			} else {
+				clock1.setText(minuten + ":0" + sekunden);
+			}
 		} else {
-			clock2.setText(minuten + ":0" + sekunden);
+			if (sekunden > 9) {
+				clock2.setText(minuten + ":" + sekunden);
+			} else {
+				clock2.setText(minuten + ":0" + sekunden);
+			}
 		}
+		
 	}
 
 	private class Speichern implements ActionListener {
