@@ -1,3 +1,4 @@
+
 package spiel;
 
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ public class Main {
 		int[] davor = new int[2];
 		
 		while (m.feld.istZuende(wAmZug) == 0) {
+			//System.out.println(m.feld.getNotationFuerMenschen() + "\n\n\n");
 			davor = Arrays.copyOf(geklickt, geklickt.length);
 			geklickt = m.brett.setFiguren(m.feld);
 			if (m.feld.getFeld()[geklickt[0]][geklickt[1]] == null) {
@@ -59,7 +61,8 @@ public class Main {
 			} else {
 				// Gegnerische Figur wurde angeklickt.
 				
-				if (m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug) {					
+				if ((m.feld.getFeld()[davor[0]][davor[1]] != null) && 
+						(m.feld.getFeld()[davor[0]][davor[1]].isWeiss() == wAmZug)) {					
 					// Davor wurde eine eigene Figur angeklickt: Zug möglich?
 					
 					Zug z = new Zug(davor[0], davor[1], geklickt[0], geklickt[1]);
